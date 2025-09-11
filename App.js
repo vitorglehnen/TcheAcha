@@ -1,8 +1,31 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import React from 'react';
-import LoginScreen from './src/screens/Login/LoginScreen';
+import React, { useState, useEffect } from "react";
+import { View } from "react-native";
+import LoginScreen from "./src/views/LoginScreen";
+import HomeScreen from "./src/views/HomeScreen";
+import { supabase } from "./src/services/supabaseClient";
 
 export default function App() {
-  return <LoginScreen />;
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    // Pega sessão atual
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data?.session ?? null);
+    };
+    getSession();
+
+    // Ouve mudanças de autenticação (login/logout)
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+      }
+    );
+
+    return () => listener.subscription.unsubscribe();
+  }, []);
+
+  return <View style={{ flex: 1 }}>
+    {session ? <HomeScreen /> : <LoginScreen />}
+  </View>;
 }
