@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View } from "react-native";
-import LoginScreen from "./src/views/LoginScreen";
-import HomeScreen from "./src/views/HomeScreen";
+import LoginScreen from "./src/views/login/LoginScreen";
+import HomeScreen from "./src/views/home/HomeScreen";
 import { supabase } from "./src/services/supabaseClient";
 
 export default function App() {
