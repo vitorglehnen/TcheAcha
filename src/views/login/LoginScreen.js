@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as AuthSession from "expo-auth-session";
-import { supabase } from "../services/supabaseClient"; // ajuste o caminho
+import { supabase } from "../../services/supabaseClient"; // ajuste o caminho
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -57,7 +57,7 @@ export default function LoginScreen({ navigation }) {
 
           {/* Logo */}
           <Image
-            source={require("../../assets/logo.png")}
+            source={require("../../../assets/logo.png")}
             style={styles.logo}
             resizeMode="contain"
           />
@@ -127,20 +127,20 @@ export default function LoginScreen({ navigation }) {
             <ActivityIndicator size="small" color="#000" />
           ) : (
             <Image
-              source={require("../../assets/google.png")}
+              source={require("../../../assets/google.png")}
               style={styles.socialIcon}
             />
           )}
         </TouchableOpacity>
         <TouchableOpacity style={styles.socialButton} disabled>
           <Image
-            source={require("../../assets/microsoft.png")}
+            source={require("../../../assets/microsoft.png")}
             style={styles.socialIcon}
           />
         </TouchableOpacity>
         <TouchableOpacity style={styles.socialButton} disabled>
           <Image
-            source={require("../../assets/apple.png")}
+            source={require("../../../assets/apple.png")}
             style={styles.socialIcon}
           />
         </TouchableOpacity>
