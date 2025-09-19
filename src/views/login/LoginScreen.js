@@ -10,8 +10,13 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import * as AuthSession from "expo-auth-session";
-import { supabase } from "../../services/supabaseClient"; // ajuste o caminho
+import { makeRedirectUri } from "expo-auth-session";
+import * as WebBrowser from "expo-web-browser";
+import Constants from "expo-constants";
+import { supabase } from "../../lib/supabase"; // ajuste o caminho
+
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -23,22 +28,38 @@ export default function LoginScreen({ navigation }) {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      const redirectUrl = AuthSession.makeRedirectUri({
-        useProxy: true, // facilita no Expo Go (teste local)
+      const isExpoGo = Constants.appOwnership === "expo";
+      const redirectTo = makeRedirectUri({
+        useProxy: isExpoGo,          // Expo Go -> proxy; standalone -> deep link
+        scheme: "tcheacha",         // must match your app.json/app.config.js
+        path: "auth/callback",
       });
 
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: redirectUrl },
+        options: {
+          redirectTo,
+          skipBrowserRedirect: true, // return URL instead of trying to open it
+          queryParams: { access_type: "offline", prompt: "consent" },
+        },
       });
+      if (error) throw error;
 
-      if (error) {
-        Alert.alert("Erro", error.message);
+      const authUrl = data?.url;
+      if (!authUrl) throw new Error("Nenhuma URL de autenticação retornada");
+
+      const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectTo);
+
+      if (result.type === "success" && result.url) {
+        const { error: exchangeError } =
+          await supabase.auth.exchangeCodeForSession(result.url);
+        if (exchangeError) throw exchangeError;
+        // App.js will detect the session and switch to HomeScreen
+      } else if (result.type === "cancel") {
+        // usuário cancelou
       }
-      // O redirecionamento para Home vai acontecer pelo AppNavigator,
-      // quando detectar sessão ativa no onAuthStateChange
     } catch (err) {
-      Alert.alert("Erro inesperado", err.message);
+      Alert.alert("Erro inesperado", err.message ?? String(err));
     } finally {
       setLoading(false);
     }
@@ -149,7 +170,7 @@ export default function LoginScreen({ navigation }) {
       {/* Registrar */}
       <View style={styles.registerContainer}>
         <Text style={styles.registerText}>Ainda não possui uma conta?</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+        <TouchableOpacity onPress={() => navigation?.navigate("Register")}> 
           <Text style={styles.registerLink}> Registre-se</Text>
         </TouchableOpacity>
       </View>

@@ -2,6 +2,7 @@
   "expo": {
     "name": "tche_acha",
     "slug": "tche_acha",
+    "scheme": "tcheacha",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

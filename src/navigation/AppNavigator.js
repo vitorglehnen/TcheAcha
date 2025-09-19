@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { supabase } from "../services/supabaseClient";
+import { supabase } from "../lib/supabase";
 
 import LoginScreen from "../views/LoginScreen";
 import HomeScreen from "../views/HomeScreen";

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View } from "react-native";
 import LoginScreen from "./src/views/login/LoginScreen";
 import HomeScreen from "./src/views/home/HomeScreen";
-import { supabase } from "./src/services/supabaseClient";
+import { supabase } from "./src/lib/supabase";
 
 export default function App() {
   const [session, setSession] = useState(null);

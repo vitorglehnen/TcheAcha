@@ -15,6 +15,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     persistSession: true,
     detectSessionInUrl: false, // importante para mobile
     lock: processLock,
+    flowType: 'pkce',
   },
 });
 
