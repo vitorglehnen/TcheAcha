@@ -12,9 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { makeRedirectUri } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
-import Constants from "expo-constants";
-import { supabase } from "../../lib/supabase"; // ajuste o caminho
-
+import { supabase } from "../../lib/supabase";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -24,25 +22,22 @@ export default function LoginScreen({ navigation }) {
   const [secure, setSecure] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  // Função para login com Google
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      const isExpoGo = Constants.appOwnership === "expo";
       const redirectTo = makeRedirectUri({
-        useProxy: isExpoGo,          // Expo Go -> proxy; standalone -> deep link
-        scheme: "tcheacha",         // must match your app.json/app.config.js
-        path: "auth/callback",
+        scheme: "tcheacha",
+        useProxy: true,
       });
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo,
-          skipBrowserRedirect: true, // return URL instead of trying to open it
-          queryParams: { access_type: "offline", prompt: "consent" },
+          skipBrowserRedirect: true,
         },
       });
+
       if (error) throw error;
 
       const authUrl = data?.url;
@@ -51,15 +46,18 @@ export default function LoginScreen({ navigation }) {
       const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectTo);
 
       if (result.type === "success" && result.url) {
-        const { error: exchangeError } =
-          await supabase.auth.exchangeCodeForSession(result.url);
-        if (exchangeError) throw exchangeError;
-        // App.js will detect the session and switch to HomeScreen
-      } else if (result.type === "cancel") {
-        // usuário cancelou
+        const url = new URL(result.url);
+        const code = url.searchParams.get("code");
+
+        if (code) {
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+          if (exchangeError) throw exchangeError;
+        } else {
+          throw new Error("Código de autorização não encontrado na URL de retorno.");
+        }
       }
     } catch (err) {
-      Alert.alert("Erro inesperado", err.message ?? String(err));
+      Alert.alert("Erro no Login", err.message ?? "Ocorreu um erro inesperado.");
     } finally {
       setLoading(false);
     }
@@ -67,16 +65,12 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* TopBar com logo + textos */}
       <View style={styles.topBar}>
         <View style={styles.logoTextContainer}>
-          {/* Textos */}
           <View style={styles.textContainer}>
             <Text style={styles.title}>Entrar</Text>
             <Text style={styles.subtitle}>Olá! Bem vindo de volta</Text>
           </View>
-
-          {/* Logo */}
           <Image
             source={require("../../../assets/logo.png")}
             style={styles.logo}
@@ -85,9 +79,7 @@ export default function LoginScreen({ navigation }) {
         </View>
       </View>
 
-      {/* Campos de login */}
       <View style={styles.inputsContainer}>
-        {/* Email */}
         <View style={styles.inputWrapper}>
           <Text style={styles.label}>Email</Text>
           <TextInput
@@ -98,8 +90,6 @@ export default function LoginScreen({ navigation }) {
             onChangeText={setEmail}
           />
         </View>
-
-        {/* Senha */}
         <View style={styles.inputWrapper}>
           <Text style={styles.label}>Senha</Text>
           <View style={styles.passwordWrapper}>
@@ -125,19 +115,16 @@ export default function LoginScreen({ navigation }) {
         </View>
       </View>
 
-      {/* Botão Entrar */}
       <TouchableOpacity style={styles.button}>
         <Text style={styles.buttonText}>Entrar</Text>
       </TouchableOpacity>
 
-      {/* Linha divisória */}
       <View style={styles.divider}>
         <View style={styles.line} />
         <Text style={styles.dividerText}>Ou continue com</Text>
         <View style={styles.line} />
       </View>
 
-      {/* Botões sociais */}
       <View style={styles.socialContainer}>
         <TouchableOpacity
           style={styles.socialButton}
@@ -167,10 +154,9 @@ export default function LoginScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* Registrar */}
       <View style={styles.registerContainer}>
         <Text style={styles.registerText}>Ainda não possui uma conta?</Text>
-        <TouchableOpacity onPress={() => navigation?.navigate("Register")}> 
+        <TouchableOpacity onPress={() => navigation?.navigate("Register")}>
           <Text style={styles.registerLink}> Registre-se</Text>
         </TouchableOpacity>
       </View>
@@ -184,8 +170,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
     paddingHorizontal: 20,
   },
-
-  // TopBar
   topBar: {
     width: "100%",
     paddingTop: 40,
@@ -216,8 +200,6 @@ const styles = StyleSheet.create({
     color: "#B5B5B5",
     marginTop: 4,
   },
-
-  // Inputs
   inputsContainer: {
     marginBottom: 20,
   },
@@ -259,8 +241,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#000",
   },
-
-  // Botão Entrar
   button: {
     backgroundColor: "#F7885D",
     paddingVertical: 12,
@@ -273,8 +253,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-
-  // Divisor
   divider: {
     flexDirection: "row",
     alignItems: "center",
@@ -290,8 +268,6 @@ const styles = StyleSheet.create({
     color: "#B5B5B5",
     fontSize: 16,
   },
-
-  // Social login
   socialContainer: {
     flexDirection: "row",
     justifyContent: "center",
@@ -312,12 +288,11 @@ const styles = StyleSheet.create({
     height: 24,
     resizeMode: "contain",
   },
-
-  // Registrar
   registerContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 140,
+    marginTop: 40,
+    paddingBottom: 20,
   },
   registerText: {
     fontSize: 14,
