@@ -32,7 +32,6 @@ export default function LoginScreen({ navigation }) {
     setLoading(true);
     try {
       await signIn(email, senha);
-      // A navegação para a tela principal será tratada pelo App.js que observa o estado da autenticação
     } catch (error) {
       Alert.alert("Erro no Login", error.message);
     } finally {
@@ -162,18 +161,6 @@ export default function LoginScreen({ navigation }) {
             />
           )}
         </TouchableOpacity>
-        {/* <TouchableOpacity style={styles.socialButton} disabled>
-          <Image
-            source={require("../../../assets/microsoft.png")}
-            style={styles.socialIcon}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton} disabled>
-          <Image
-            source={require("../../../assets/apple.png")}
-            style={styles.socialIcon}
-          />
-        </TouchableOpacity> */}
       </View>
 
       <View style={styles.registerContainer}>

@@ -9,6 +9,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './HomeScreen.styles';
 import NavBar from '../../components/NavBar';
+import Menu from '../../components/Menu';
 import { supabase } from '../../lib/supabase';
 
 const mockCases = [
@@ -33,6 +34,7 @@ const mockCases = [
 const HomeScreen = ({ navigation }) => {
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isMenuVisible, setMenuVisible] = useState(false);  
 
   useEffect(() => {
     const fetchCases = async () => {
@@ -53,8 +55,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.headerTopRow}>
           <TouchableOpacity 
             style={styles.menuIcon}
-            onPress={() => console.log("Botão de menu pressionado")}
-          >
+            onPress={() => setMenuVisible(true)}>
             <Ionicons name="menu" size={32} color="#1A233D" />
           </TouchableOpacity>
           <Image source={require('../../../assets/logo.png')} style={styles.logo} />
@@ -100,6 +101,14 @@ const HomeScreen = ({ navigation }) => {
         activeScreen="Home"
         onProfilePress={handleProfilePress}
       />
+
+      {isMenuVisible && (
+      <Menu 
+        visible={isMenuVisible} 
+        onClose={() => setMenuVisible(false)} 
+        navigation={navigation}
+      />
+      )}
     </View>
   );
 };
