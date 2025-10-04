@@ -45,8 +45,9 @@ const HomeScreen = ({ navigation }) => {
     fetchCases();
   }, []);
 
-  const handleAddPress = () => navigation?.navigate("Cadastrar Caso");
-  const handleProfilePress = () => navigation?.navigate("Meu Perfil");
+  const handleAddPress = () => navigation?.navigate("RegisterMissing");
+  const handleProfilePress = () => navigation?.navigate("Profile");
+  const handleMapPress = () => navigation?.navigate("Map");
 
   return (
     <View style={styles.mainContainer}>
@@ -69,6 +70,22 @@ const HomeScreen = ({ navigation }) => {
           Abaixo consta uma lista de desaparecidos na sua região.
           Nos auxilie nas buscas e venha fazer parte dessa comunidade.
         </Text>
+
+        {/* Botão Acessar Mapa */}
+        <TouchableOpacity 
+          style={styles.mapButton}
+          onPress={handleMapPress}
+          activeOpacity={0.8}
+        >
+          <View style={styles.mapButtonContent}>
+            <Ionicons name="map-outline" size={24} color="#1A233D" />
+            <Text style={styles.mapButtonTitle}>Acessar mapa com casos ativos</Text>
+            <Ionicons name="chevron-forward" size={24} color="#1A233D" />
+          </View>
+          <Text style={styles.mapButtonDescription}>
+            Ao clicar aqui, você será redirecionado para uma tela onde consta o mapa com casos de desaparecimentos reais cadastrados em nosso banco de dados
+          </Text>
+        </TouchableOpacity>
         
         {/* Lista de Casos */}
         {cases.map((caso) => (
@@ -99,6 +116,7 @@ const HomeScreen = ({ navigation }) => {
       {/* Barra de Navegação */}
       <NavBar
         activeScreen="Home"
+        onAddPress={handleAddPress}
         onProfilePress={handleProfilePress}
       />
 
