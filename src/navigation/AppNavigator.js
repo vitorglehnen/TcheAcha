@@ -3,6 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { supabase } from "../lib/supabase";
 
+import BeforeLogin from "../views/before_login/BeforeLogin";
 import LoginScreen from "../views/login/LoginScreen";
 import HomeScreen from "../views/home/HomeScreen";
 import RegisterScreen from "../views/register/RegisterScreen";
@@ -61,6 +62,7 @@ export default function AppNavigator() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {session ? (
+          // Usuário autenticado → vai para Home
           <Stack.Group>
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="Profile" component={ProfileScreen} />
@@ -69,7 +71,9 @@ export default function AppNavigator() {
             <Stack.Screen name="RegisterMissing" component={RegisterMissingScreen} />
           </Stack.Group>
         ) : (
+          // Telas para usuário não autenticado
           <Stack.Group>
+            <Stack.Screen name="BeforeLogin" component={BeforeLogin} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
           </Stack.Group>
