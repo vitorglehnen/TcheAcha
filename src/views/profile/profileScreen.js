@@ -32,6 +32,10 @@ export default function ProfileScreen({ navigation }) {
         console.log(`Editar campo: ${field}`);
     };
 
+    const handleSettings = () => {
+        navigation.navigate("Settings");
+    }
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <StatusBar barStyle="light-content" backgroundColor="#03A9F4" />
@@ -41,8 +45,8 @@ export default function ProfileScreen({ navigation }) {
                     <TouchableOpacity onPress={handleGoBack}>
                         <Ionicons name="arrow-back" size={28} color="white" />
                     </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Seu Perfil</Text>
-                    <TouchableOpacity onPress={handleSettings}>
+                     <Text style={styles.headerTitle}>Seu Perfil</Text>
+                     <TouchableOpacity onPress={handleSettings}>
                         <Ionicons name="settings-outline" size={28} color="white" />
                     </TouchableOpacity>
                 </View>
