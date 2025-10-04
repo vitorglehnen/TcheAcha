@@ -7,6 +7,9 @@ import LoginScreen from "../views/login/LoginScreen";
 import HomeScreen from "../views/home/HomeScreen";
 import RegisterScreen from "../views/register/RegisterScreen";
 import ProfileScreen from "../views/profile/profileScreen";
+import MapScreen from "../views/map/MapScreen";
+import SettingsScreen from "../views/settings/SettingsScreen";
+import RegisterMissingScreen from "../views/registerMissing/RegisterMissingScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -49,19 +52,23 @@ export default function AppNavigator() {
     return null; // pode colocar uma SplashScreen ou loader aqui
   }
 
-  console.log("Renderizando AppNavigator. Sessão atual:", session ? `logado com user ID: ${session.user.id}`: "não logado");
+  console.log(
+    "Renderizando AppNavigator. Sessão atual:",
+    session ? `logado com user ID: ${session.user.id}` : "não logado"
+  );
 
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {session ? (
-          // Usuário autenticado → vai para Home
           <Stack.Group>
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen name="Map" component={MapScreen} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="RegisterMissing" component={RegisterMissingScreen} />
           </Stack.Group>
         ) : (
-          // Telas para usuário não autenticado
           <Stack.Group>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />

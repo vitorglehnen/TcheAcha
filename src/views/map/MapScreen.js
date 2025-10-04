@@ -1,62 +1,75 @@
-import MapView, { CalloutSubview } from 'react-native-maps';
-import { StyleSheet, View, Image, Text } from 'react-native';
-import { Marker, Callout } from 'react-native-maps';
+import React from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import NavBar from "../../components/NavBar";
 
-export default function MapScreen() {
-    return (
-        <View style={styles.container}>
-            <MapView
-                initialRegion={{
-                    latitude: -29.795661701468216,
-                    longitude: -51.86645934413101,
-                    latitudeDelta: 0.0922,
-                    longitudeDelta: 0.0421,
-                }}
+export default function MapScreen({ navigation }) {
+  return (
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={28} color="#222" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Mapa</Text>
+        <View style={{ width: 28 }} />
+      </View>
 
-                style={styles.map} >
-                <Marker
-                    coordinate={{ latitude: -29.795661701468216, longitude: -51.86645934413101 }}
-                >
-                    <Image
-                        source={{ uri: 'https://logodownload.org/wp-content/uploads/2015/05/internacional-porto-alegre-logo-escudo-4.png' }}
-                        style={styles.marker}
-                    />
-                    <Callout>
-                        <CalloutSubview>
-                            <View style={styles.callout}>
-                                <Text style={styles.calloutText}>Internacional - Porto Alegre</Text>
-                            </View>
-                        </CalloutSubview>
+      {/* Content */}
+      <View style={styles.content}>
+        <Ionicons name="map-outline" size={100} color="#ddd" />
+        <Text style={styles.placeholderText}>Mapa em desenvolvimento</Text>
+        <Text style={styles.placeholderSubtext}>
+          Em breve você poderá visualizar locais de desaparecimentos
+        </Text>
+      </View>
 
-                    </Callout>
-                </Marker>
-            </MapView>
-        </View>
-    );
+      {/* NavBar */}
+      <NavBar
+        onHomePress={() => navigation.navigate("Home")}
+        onProfilePress={() => navigation.navigate("Profile")}
+        activeScreen="Map"
+      />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    map: {
-        width: '100%',
-        height: '100%',
-    },
-    marker: {
-        width: 50,
-        height: 50,
-    },
-    callout: {
-        padding: 15,
-        backgroundColor: 'white',
-        borderRadius: 5,
-        alignItems: 'center',
-        minWidth: 150,
-        minHeight: 50,
-    },
-    calloutText: {
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingTop: 48,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#222",
+  },
+  content: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  placeholderText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#666",
+    marginTop: 16,
+  },
+  placeholderSubtext: {
+    fontSize: 14,
+    color: "#999",
+    marginTop: 8,
+    textAlign: "center",
+  },
 });

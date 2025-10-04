@@ -35,4 +35,9 @@ export const styles = StyleSheet.create({
     marginLeft: 15,
     color: '#1A233D',
   },
+  divider: {
+    height: 1,
+    backgroundColor: '#ddd',
+    marginVertical: 10,
+  },
 });
