@@ -9,6 +9,10 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  mainContainer: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
   // Cabeçalho com o menu
   headerContainer: {
     paddingHorizontal: 20,
@@ -43,6 +47,34 @@ export const styles = StyleSheet.create({
     marginTop: 8,
     lineHeight: 20,
     marginBottom: 20,
+  },
+  // Botão do Mapa
+  mapButton: {
+    backgroundColor: '#4DD0E1',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 2,
+    borderColor: '#26C6DA',
+  },
+  mapButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  mapButtonTitle: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1A233D',
+    marginLeft: 12,
+  },
+  mapButtonDescription: {
+    fontSize: 12,
+    color: '#1A233D',
+    lineHeight: 18,
+    marginTop: 4,
   },
   // Card de caso
   cardContainer: {
