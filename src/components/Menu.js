@@ -28,9 +28,81 @@ const Menu = ({ visible, onClose, navigation }) => {
       <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={onClose}>
         <View style={styles.menuContainer}>
           <Text style={styles.menuTitle}>Menu</Text>
+          
+          {/* Navigation Items */}
+          <TouchableOpacity 
+            style={styles.menuItem} 
+            onPress={() => {
+              navigation.navigate('Home');
+              onClose();
+            }}
+          >
+            <Ionicons name="home-outline" size={24} color="#1A233D" />
+            <Text style={styles.menuItemText}>Home</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.menuItem} 
+            onPress={() => {
+              navigation.navigate('Map');
+              onClose();
+            }}
+          >
+            <Ionicons name="map-outline" size={24} color="#1A233D" />
+            <Text style={styles.menuItemText}>Mapa</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.menuItem} 
+            onPress={() => {
+              navigation.navigate('Profile');
+              onClose();
+            }}
+          >
+            <Ionicons name="person-outline" size={24} color="#1A233D" />
+            <Text style={styles.menuItemText}>Perfil</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.menuItem} 
+            onPress={() => {
+              navigation.navigate('Settings');
+              onClose();
+            }}
+          >
+            <Ionicons name="settings-outline" size={24} color="#1A233D" />
+            <Text style={styles.menuItemText}>Configurações</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.menuItem} 
+            onPress={() => {
+              navigation.navigate('Register');
+              onClose();
+            }}
+          >
+            <Ionicons name="person-add-outline" size={24} color="#1A233D" />
+            <Text style={styles.menuItemText}>Registrar</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.menuItem} 
+            onPress={() => {
+              navigation.navigate('RegisterMissing');
+              onClose();
+            }}
+          >
+            <Ionicons name="add-circle-outline" size={24} color="#1A233D" />
+            <Text style={styles.menuItemText}>Cadastrar Desaparecido</Text>
+          </TouchableOpacity>
+
+          {/* Divider */}
+          <View style={styles.divider} />
+
+          {/* Logout */}
           <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
-            <Ionicons name="log-out-outline" size={24} color="#1A233D" />
-            <Text style={styles.menuItemText}>Sair</Text>
+            <Ionicons name="log-out-outline" size={24} color="#e74c3c" />
+            <Text style={[styles.menuItemText, { color: '#e74c3c' }]}>Sair</Text>
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
