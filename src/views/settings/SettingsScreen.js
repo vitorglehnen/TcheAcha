@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
-import NavBar from "../../components/NavBar";
+import NavBar from "../../components/navbar/NavBar";
 
 export default function SettingsScreen({ navigation }) {
   return (

@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import NavBar from "../../components/NavBar";
+import NavBar from "../../components/navbar/NavBar";
 
 export default function MapScreen({ navigation }) {
   return (
