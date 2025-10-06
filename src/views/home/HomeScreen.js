@@ -8,9 +8,10 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './HomeScreen.styles';
-import NavBar from '../../components/NavBar';
-import Menu from '../../components/Menu';
+import NavBar from '../../components/navbar/NavBar';
+import Menu from '../../components/menu/Menu';
 import { supabase } from '../../lib/supabase';
+import Header from '../../components/header/Header';
 
 const mockCases = [
   {
@@ -51,20 +52,17 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={styles.mainContainer}>
-      {/* Cabeçalho Fixo com Ícone de Menu */}
-      <View style={styles.headerContainer}>
-        <View style={styles.headerTopRow}>
-          <TouchableOpacity 
-            style={styles.menuIcon}
-            onPress={() => setMenuVisible(true)}>
-            <Ionicons name="menu" size={32} color="#1A233D" />
-          </TouchableOpacity>
-          <Image source={require('../../../assets/logo.png')} style={styles.logo} />
-        </View>
-      </View>
+      <Header 
+        title="TchêAcha"
+        description="Abaixo consta uma lista de desaparecidos na sua região. Nos auxilie nas buscas e venha fazer parte dessa comunidade."
+        leftIcon="menu"
+        onLeftPress={() => setMenuVisible(true)}
+        showLogo={true}
+      />
       
       {/* Conteúdo com Rolagem */}
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
+<<<<<<< Updated upstream
         <Text style={styles.title}>TchêAcha</Text>
         <Text style={styles.description}>
           Abaixo consta uma lista de desaparecidos na sua região.
@@ -87,6 +85,9 @@ const HomeScreen = ({ navigation }) => {
           </Text>
         </TouchableOpacity>
         
+=======
+        <br /> 
+>>>>>>> Stashed changes
         {/* Lista de Casos */}
         {cases.map((caso) => (
           <View key={caso.id} style={styles.cardContainer}>
