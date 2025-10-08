@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "./styles";
+import NavBar from "../../components/navbar/NavBar";
 
 const userData = {
     name: "Fulano de tal",
@@ -45,8 +46,8 @@ export default function ProfileScreen({ navigation }) {
                     <TouchableOpacity onPress={handleGoBack}>
                         <Ionicons name="arrow-back" size={28} color="white" />
                     </TouchableOpacity>
-                     <Text style={styles.headerTitle}>Seu Perfil</Text>
-                     <TouchableOpacity onPress={handleSettings}>
+                    <Text style={styles.headerTitle}>Seu Perfil</Text>
+                    <TouchableOpacity onPress={handleSettings}>
                         <Ionicons name="settings-outline" size={28} color="white" />
                     </TouchableOpacity>
                 </View>
@@ -128,6 +129,12 @@ export default function ProfileScreen({ navigation }) {
                     </View>
                 </View>
             </View>
+            {/* Bottom Navigation */}
+            <NavBar
+                onHomePress={() => navigation?.navigate('Home')}
+                onProfilePress={() => navigation?.navigate('Profile')}
+                activeScreen="Settings"
+            />
         </SafeAreaView>
     );
 }

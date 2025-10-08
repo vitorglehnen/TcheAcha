@@ -4,7 +4,8 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Image
+  Modal,
+  Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './HomeScreen.styles';
@@ -35,7 +36,8 @@ const mockCases = [
 const HomeScreen = ({ navigation }) => {
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isMenuVisible, setMenuVisible] = useState(false);  
+  const [isMenuVisible, setMenuVisible] = useState(false);
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
 
   useEffect(() => {
     const fetchCases = async () => {
@@ -46,23 +48,56 @@ const HomeScreen = ({ navigation }) => {
     fetchCases();
   }, []);
 
-  const handleAddPress = () => navigation?.navigate("RegisterMissing");
-  const handleProfilePress = () => navigation?.navigate("Profile");
-  const handleMapPress = () => navigation?.navigate("Map");
+  const handleAddPress = () => navigation?.navigate('RegisterMissing');
+  const handleProfilePress = () => navigation?.navigate('Profile');
+  const handleMapPress = () => navigation?.navigate('Map');
+
+  // >>> LÓGICA ATUALIZADA AQUI <<<
+  const handleAuxiliePress = async (caso) => {
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+
+    // Se não houver usuário logado, mostra o modal para login/verificação
+    if (!authUser) {
+      setShowVerifyModal(true);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('usuarios')
+      .select('status_verificacao')
+      .eq('auth_user_id', authUser.id)
+      .single();
+
+    // Define os status que devem acionar o modal
+    const statusesQueMostramModal = ['NAO_VERIFICADO', 'REJEITADO'];
+
+    // Se houver erro, não encontrar o usuário, ou o status for um dos definidos acima, mostra o modal
+    if (error || !data || statusesQueMostramModal.includes(data.status_verificacao)) {
+      setShowVerifyModal(true);
+      return;
+    }
+
+    // Se o status for 'APROVADO', permite a navegação
+    if (data.status_verificacao === 'APROVADO') {
+      navigation?.navigate('Map', { casoId: caso.id });
+    }
+
+    // Se o status for 'PENDENTE', a função termina aqui e não faz nada (nem mostra modal, nem navega),
+    // conforme solicitado.
+  };
 
   return (
     <View style={styles.mainContainer}>
-      <Header 
+      <Header
         title="TchêAcha"
         description="Abaixo consta uma lista de desaparecidos na sua região. Nos auxilie nas buscas e venha fazer parte dessa comunidade."
         leftIcon="menu"
         onLeftPress={() => setMenuVisible(true)}
         showLogo={true}
       />
-      
-      {/* Conteúdo com Rolagem */}
+
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.mapButton}
           onPress={handleMapPress}
           activeOpacity={0.8}
@@ -77,7 +112,6 @@ const HomeScreen = ({ navigation }) => {
           </Text>
         </TouchableOpacity>
 
-        {/* Lista de Casos */}
         {cases.map((caso) => (
           <View key={caso.id} style={styles.cardContainer}>
             <View style={styles.cardHeader}>
@@ -85,16 +119,37 @@ const HomeScreen = ({ navigation }) => {
                 Desaparecido(a) há {caso.diasDesaparecido} dias
               </Text>
             </View>
+
             <View style={styles.cardBody}>
               <View style={styles.imagePlaceholder}>
-                 <Ionicons name="person" size={40} color="#ccc" />
+                <Ionicons name="person" size={40} color="#ccc" />
               </View>
+
               <View style={styles.cardDetails}>
-                <Text style={styles.detailText}><Text style={styles.detailLabel}>Nome:</Text> {caso.nome_desaparecido}</Text>
-                {caso.data_nascimento && <Text style={styles.detailText}><Text style={styles.detailLabel}>Nascimento:</Text> {new Date(caso.data_nascimento).toLocaleDateString('pt-BR')}</Text>}
-                <Text style={styles.detailText}><Text style={styles.detailLabel}>Desaparecimento:</Text> {new Date(caso.data_desaparecimento).toLocaleDateString('pt-BR')}</Text>
-                <Text style={styles.detailText}><Text style={styles.detailLabel}>Localidade:</Text> {caso.endereco_desaparecimento_formatado}</Text>
-                <TouchableOpacity style={styles.auxilieButton}>
+                <Text style={styles.detailText}>
+                  <Text style={styles.detailLabel}>Nome:</Text> {caso.nome_desaparecido}
+                </Text>
+
+                {caso.data_nascimento && (
+                  <Text style={styles.detailText}>
+                    <Text style={styles.detailLabel}>Nascimento:</Text>{' '}
+                    {new Date(caso.data_nascimento).toLocaleDateString('pt-BR')}
+                  </Text>
+                )}
+
+                <Text style={styles.detailText}>
+                  <Text style={styles.detailLabel}>Desaparecimento:</Text>{' '}
+                  {new Date(caso.data_desaparecimento).toLocaleDateString('pt-BR')}
+                </Text>
+
+                <Text style={styles.detailText}>
+                  <Text style={styles.detailLabel}>Localidade:</Text> {caso.endereco_desaparecimento_formatado}
+                </Text>
+
+                <TouchableOpacity
+                  style={styles.auxilieButton}
+                  onPress={() => handleAuxiliePress(caso)}
+                >
                   <Text style={styles.auxilieButtonText}>AUXILIE</Text>
                 </TouchableOpacity>
               </View>
@@ -103,7 +158,6 @@ const HomeScreen = ({ navigation }) => {
         ))}
       </ScrollView>
 
-      {/* Barra de Navegação */}
       <NavBar
         activeScreen="Home"
         onAddPress={handleAddPress}
@@ -111,15 +165,121 @@ const HomeScreen = ({ navigation }) => {
       />
 
       {isMenuVisible && (
-      <Menu 
-        visible={isMenuVisible} 
-        onClose={() => setMenuVisible(false)} 
-        navigation={navigation}
-      />
+        <Menu
+          visible={isMenuVisible}
+          onClose={() => setMenuVisible(false)}
+          navigation={navigation}
+        />
       )}
+
+      {/* MODAL DE VERIFICAÇÃO */}
+      <Modal
+        visible={showVerifyModal}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setShowVerifyModal(false)}
+      >
+        <View style={modalStyles.backdrop}>
+          <View style={modalStyles.container}>
+            <View style={modalStyles.header}>
+              <Text style={modalStyles.title}>Você precisa ser verificado</Text>
+              <Pressable onPress={() => setShowVerifyModal(false)}>
+                <Text style={modalStyles.close}>✕</Text>
+              </Pressable>
+            </View>
+
+            <Text style={modalStyles.message}>
+              Para cadastrar ou participar de algum caso você precisa estar verificado.
+              É necessário enviar alguns documentos para a análise.
+            </Text>
+
+            <View style={modalStyles.row}>
+              <Pressable
+                style={[modalStyles.button, modalStyles.secondary]}
+                onPress={() => setShowVerifyModal(false)}
+              >
+                <Text style={modalStyles.secondaryText}>AGORA NÃO</Text>
+              </Pressable>
+
+              <Pressable
+                style={[modalStyles.button, modalStyles.primary]}
+                onPress={() => {
+                  setShowVerifyModal(false);
+                  navigation?.navigate('VerifyIdentity');
+                }}
+              >
+                <Text style={modalStyles.primaryText}>ENVIAR</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
 
+const modalStyles = {
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+  },
+  container: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    elevation: 6,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  title: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  close: {
+    fontSize: 18,
+    opacity: 0.6,
+    paddingHorizontal: 4,
+  },
+  message: {
+    marginTop: 8,
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#222',
+  },
+  row: {
+    marginTop: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  button: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  secondary: {
+    borderWidth: 1,
+    borderColor: '#c7c7c7',
+  },
+  secondaryText: {
+    fontWeight: '600',
+  },
+  primary: {
+    backgroundColor: '#0f74c8',
+  },
+  primaryText: {
+    color: '#fff',
+    fontWeight: '700',
+  },
+};
 
 export default HomeScreen;
