@@ -127,17 +127,80 @@ export const styles = StyleSheet.create({
   detailLabel: {
     fontWeight: 'bold',
   },
-  auxilieButton: {
-    backgroundColor: '#333',
+  detailsButton: {
+    backgroundColor: COLORS.primary,
     paddingVertical: 12,
     borderRadius: 8,
     marginTop: 12,
     alignItems: 'center',
   },
-  auxilieButtonText: {
+  detailsButtonText: {
     color: COLORS.white,
     fontWeight: 'bold',
     fontSize: 16,
   },
 });
 
+export const modalStyles = {
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+  },
+  container: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    elevation: 6,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  title: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  close: {
+    fontSize: 18,
+    opacity: 0.6,
+    paddingHorizontal: 4,
+  },
+  message: {
+    marginTop: 8,
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#222',
+  },
+  row: {
+    marginTop: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  button: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  secondary: {
+    borderWidth: 1,
+    borderColor: '#c7c7c7',
+  },
+  secondaryText: {
+    fontWeight: '600',
+  },
+  primary: {
+    backgroundColor: '#0f74c8',
+  },
+  primaryText: {
+    color: '#fff',
+    fontWeight: '700',
+  },
+};
