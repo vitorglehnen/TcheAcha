@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,29 +6,29 @@ import {
   TouchableOpacity,
   Modal,
   Pressable,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { styles } from './HomeScreen.styles';
-import NavBar from '../../components/navbar/NavBar';
-import Menu from '../../components/menu/Menu';
-import { supabase } from '../../lib/supabase';
-import Header from '../../components/header/Header';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { styles, modalStyles } from "./HomeScreen.styles";
+import NavBar from "../../components/navbar/NavBar";
+import Menu from "../../components/menu/Menu";
+import { supabase } from "../../lib/supabase";
+import Header from "../../components/header/Header";
 
 const mockCases = [
   {
     id: 1,
-    nome_desaparecido: 'Fulano de Ciclano',
-    data_nascimento: '2012-12-12',
-    data_desaparecimento: '2025-04-01',
-    endereco_desaparecimento_formatado: 'Centro, Venâncio Aires',
+    nome_desaparecido: "Fulano de Ciclano",
+    data_nascimento: "2012-12-12",
+    data_desaparecimento: "2025-04-01",
+    endereco_desaparecimento_formatado: "Centro, Venâncio Aires",
     diasDesaparecido: 157,
   },
   {
     id: 2,
-    nome_desaparecido: 'Cachorro Caramelo',
+    nome_desaparecido: "Cachorro Caramelo",
     data_nascimento: null,
-    data_desaparecimento: '2025-09-20',
-    endereco_desaparecimento_formatado: 'Higienópolis, Porto Alegre',
+    data_desaparecimento: "2025-09-20",
+    endereco_desaparecimento_formatado: "Higienópolis, Porto Alegre",
     diasDesaparecido: 4,
   },
 ];
@@ -48,13 +48,14 @@ const HomeScreen = ({ navigation }) => {
     fetchCases();
   }, []);
 
-  const handleAddPress = () => navigation?.navigate('RegisterMissing');
-  const handleProfilePress = () => navigation?.navigate('Profile');
-  const handleMapPress = () => navigation?.navigate('Map');
+  const handleAddPress = () => navigation?.navigate("RegisterMissing");
+  const handleProfilePress = () => navigation?.navigate("Profile");
+  const handleMapPress = () => navigation?.navigate("Map");
 
-  // >>> LÓGICA ATUALIZADA AQUI <<<
-  const handleAuxiliePress = async (caso) => {
-    const { data: { user: authUser } } = await supabase.auth.getUser();
+  const handleDetailsPress = async (caso) => {
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
 
     // Se não houver usuário logado, mostra o modal para login/verificação
     if (!authUser) {
@@ -63,27 +64,28 @@ const HomeScreen = ({ navigation }) => {
     }
 
     const { data, error } = await supabase
-      .from('usuarios')
-      .select('status_verificacao')
-      .eq('auth_user_id', authUser.id)
+      .from("usuarios")
+      .select("status_verificacao")
+      .eq("auth_user_id", authUser.id)
       .single();
 
     // Define os status que devem acionar o modal
-    const statusesQueMostramModal = ['NAO_VERIFICADO', 'REJEITADO'];
+    const statusesQueMostramModal = ["NAO_VERIFICADO", "REJEITADO"];
 
     // Se houver erro, não encontrar o usuário, ou o status for um dos definidos acima, mostra o modal
-    if (error || !data || statusesQueMostramModal.includes(data.status_verificacao)) {
+    if (
+      error ||
+      !data ||
+      statusesQueMostramModal.includes(data.status_verificacao)
+    ) {
       setShowVerifyModal(true);
       return;
     }
 
     // Se o status for 'APROVADO', permite a navegação
-    if (data.status_verificacao === 'APROVADO') {
-      navigation?.navigate('Map', { casoId: caso.id });
+    if (data.status_verificacao === "APROVADO") {
+      navigation?.navigate("CaseDetail", { casoId: caso.id });
     }
-
-    // Se o status for 'PENDENTE', a função termina aqui e não faz nada (nem mostra modal, nem navega),
-    // conforme solicitado.
   };
 
   return (
@@ -104,11 +106,15 @@ const HomeScreen = ({ navigation }) => {
         >
           <View style={styles.mapButtonContent}>
             <Ionicons name="map-outline" size={24} color="#1A233D" />
-            <Text style={styles.mapButtonTitle}>Acessar mapa com casos ativos</Text>
+            <Text style={styles.mapButtonTitle}>
+              Acessar mapa com casos ativos
+            </Text>
             <Ionicons name="chevron-forward" size={24} color="#1A233D" />
           </View>
           <Text style={styles.mapButtonDescription}>
-            Ao clicar aqui, você será redirecionado para uma tela onde consta o mapa com casos de desaparecimentos reais cadastrados em nosso banco de dados
+            Ao clicar aqui, você será redirecionado para uma tela onde consta o
+            mapa com casos de desaparecimentos reais cadastrados em nosso banco
+            de dados
           </Text>
         </TouchableOpacity>
 
@@ -127,30 +133,34 @@ const HomeScreen = ({ navigation }) => {
 
               <View style={styles.cardDetails}>
                 <Text style={styles.detailText}>
-                  <Text style={styles.detailLabel}>Nome:</Text> {caso.nome_desaparecido}
+                  <Text style={styles.detailLabel}>Nome:</Text>{" "}
+                  {caso.nome_desaparecido}
                 </Text>
 
                 {caso.data_nascimento && (
                   <Text style={styles.detailText}>
-                    <Text style={styles.detailLabel}>Nascimento:</Text>{' '}
-                    {new Date(caso.data_nascimento).toLocaleDateString('pt-BR')}
+                    <Text style={styles.detailLabel}>Nascimento:</Text>{" "}
+                    {new Date(caso.data_nascimento).toLocaleDateString("pt-BR")}
                   </Text>
                 )}
 
                 <Text style={styles.detailText}>
-                  <Text style={styles.detailLabel}>Desaparecimento:</Text>{' '}
-                  {new Date(caso.data_desaparecimento).toLocaleDateString('pt-BR')}
+                  <Text style={styles.detailLabel}>Desaparecimento:</Text>{" "}
+                  {new Date(caso.data_desaparecimento).toLocaleDateString(
+                    "pt-BR"
+                  )}
                 </Text>
 
                 <Text style={styles.detailText}>
-                  <Text style={styles.detailLabel}>Localidade:</Text> {caso.endereco_desaparecimento_formatado}
+                  <Text style={styles.detailLabel}>Localidade:</Text>{" "}
+                  {caso.endereco_desaparecimento_formatado}
                 </Text>
 
                 <TouchableOpacity
-                  style={styles.auxilieButton}
-                  onPress={() => handleAuxiliePress(caso)}
+                  style={styles.detailsButton}
+                  onPress={() => handleDetailsPress(caso)}
                 >
-                  <Text style={styles.auxilieButtonText}>AUXILIE</Text>
+                  <Text style={styles.detailsButtonText}>Detalhes do Caso</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -189,8 +199,8 @@ const HomeScreen = ({ navigation }) => {
             </View>
 
             <Text style={modalStyles.message}>
-              Para cadastrar ou participar de algum caso você precisa estar verificado.
-              É necessário enviar alguns documentos para a análise.
+              Para cadastrar ou participar de algum caso você precisa estar
+              verificado. É necessário enviar alguns documentos para a análise.
             </Text>
 
             <View style={modalStyles.row}>
@@ -205,7 +215,7 @@ const HomeScreen = ({ navigation }) => {
                 style={[modalStyles.button, modalStyles.primary]}
                 onPress={() => {
                   setShowVerifyModal(false);
-                  navigation?.navigate('VerifyIdentity');
+                  navigation?.navigate("VerifyIdentity");
                 }}
               >
                 <Text style={modalStyles.primaryText}>ENVIAR</Text>
@@ -216,70 +226,6 @@ const HomeScreen = ({ navigation }) => {
       </Modal>
     </View>
   );
-};
-
-const modalStyles = {
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.35)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-  },
-  container: {
-    width: '100%',
-    maxWidth: 360,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    elevation: 6,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  title: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  close: {
-    fontSize: 18,
-    opacity: 0.6,
-    paddingHorizontal: 4,
-  },
-  message: {
-    marginTop: 8,
-    fontSize: 14,
-    lineHeight: 20,
-    color: '#222',
-  },
-  row: {
-    marginTop: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 10,
-  },
-  button: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 6,
-    alignItems: 'center',
-  },
-  secondary: {
-    borderWidth: 1,
-    borderColor: '#c7c7c7',
-  },
-  secondaryText: {
-    fontWeight: '600',
-  },
-  primary: {
-    backgroundColor: '#0f74c8',
-  },
-  primaryText: {
-    color: '#fff',
-    fontWeight: '700',
-  },
 };
 
 export default HomeScreen;

@@ -8,12 +8,13 @@ import LoginScreen from "../views/login/LoginScreen";
 import HomeScreen from "../views/home/HomeScreen";
 import RegisterScreen from "../views/register/RegisterScreen";
 import ProfileScreen from "../views/profile/profileScreen";
-import MapScreen from "../views/map/MapScreen";
+//import MapScreen from "../views/map/MapScreen";
 import SettingsScreen from "../views/settings/SettingsScreen";
 import RegisterMissingScreen from "../views/registerMissing/RegisterMissingScreen";
 import VerifyIdentityScreen from "../views/verification/VerifyIdentityScreen";
 import DocumentCaptureScreen from "../views/verification/DocumentCaptureScreen";
 import SelfieCaptureScreen from '../views/verification/SelfieCaptureScreen';
+import CaseDetailScreen from "../views/caseDetail/caseDetails";
 
 const Stack = createNativeStackNavigator();
 
@@ -69,12 +70,13 @@ export default function AppNavigator() {
           <Stack.Group>
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="Profile" component={ProfileScreen} />
-            <Stack.Screen name="Map" component={MapScreen} />
+            {/* <Stack.Screen name="Map" component={MapScreen} /> */}
             <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="RegisterMissing" component={RegisterMissingScreen} />
             <Stack.Screen name="VerifyIdentity" component={VerifyIdentityScreen} />
             <Stack.Screen name="DocumentCapture" component={DocumentCaptureScreen} />
             <Stack.Screen name="SelfieCapture" component={SelfieCaptureScreen} />
+            <Stack.Screen name="CaseDetail" component={CaseDetailScreen} />
           </Stack.Group>
         ) : (
           // Telas para usuário não autenticado
