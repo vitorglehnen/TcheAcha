@@ -6,6 +6,30 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: 50,
+    paddingBottom: 15,
+    paddingHorizontal: 15,
+    backgroundColor: COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  backButton: {
+    position: 'absolute',
+    left: 15,
+    top: 50,
+    bottom: 15,
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: COLORS.textPrimary,
+  },
   caseCard: {
     backgroundColor: COLORS.white,
     margin: 15,
@@ -16,6 +40,11 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   caseName: {
     fontSize: 18,
@@ -66,6 +95,14 @@ export const styles = StyleSheet.create({
   timelineHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  checkCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#ccc',
+    marginRight: 10,
   },
   timelineTitle: {
     fontSize: 16,
