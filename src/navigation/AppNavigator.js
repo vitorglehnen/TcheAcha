@@ -79,9 +79,9 @@ export default function AppNavigator() {
             <Stack.Screen name="Profile" component={ProfileScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="RegisterMissing" component={RegisterMissingScreen} />
-            <Stack.Screen name="VerifyIdentity" component={VerifyIdentityScreen} />
-            <Stack.Screen name="DocumentCapture" component={DocumentCaptureScreen} />
-            <Stack.Screen name="SelfieCapture" component={SelfieCaptureScreen} />
+            {/* <Stack.Screen name="VerifyIdentity" component={VerifyIdentityScreen} /> */}
+            {/* <Stack.Screen name="DocumentCapture" component={DocumentCaptureScreen} /> */}
+            {/* <Stack.Screen name="SelfieCapture" component={SelfieCaptureScreen} /> */}
             <Stack.Screen name="CaseDetail" component={CaseDetailScreen} />
           </>
         ) : (
