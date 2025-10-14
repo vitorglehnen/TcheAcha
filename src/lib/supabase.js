@@ -12,7 +12,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     ...(Platform.OS !== 'web' ? { storage: AsyncStorage } : {}),
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false, // importante para mobile
+    detectSessionInUrl: true, // importante para mobile
     lock: processLock,
     flowType: 'pkce',
   },
