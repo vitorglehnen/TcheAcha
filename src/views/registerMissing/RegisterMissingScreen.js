@@ -66,7 +66,7 @@ export default function RegisterMissingScreen({ navigation }) {
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
       <Header
         title="Cadastrar Desaparecido"
-        description="Abaixo consta uma lista de desaparecidos na sua região. Nos auxilie nas buscas e venha fazer parte dessa comunidade."
+        description=""
         leftIcon="menu"
         onLeftPress={() => setMenuVisible(true)}
         showLogo={true}
