@@ -11,6 +11,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 //import * as ImagePicker from "expo-image-picker";
 import styles from "./styles";
+import Header from "../../components/header/Header";
+import Menu from "../../components/menu/Menu";
 
 export default function RegisterMissingScreen({ navigation }) {
   const [title, setTitle] = useState("");
@@ -22,9 +24,11 @@ export default function RegisterMissingScreen({ navigation }) {
   const [location, setLocation] = useState("");
   const [contact, setContact] = useState("");
   const [image, setImage] = useState(null);
+  const [isMenuVisible, setMenuVisible] = useState(false);
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const [isMenuVisible, setMenuVisible] = useState(false);
     
     if (status !== "granted") {
       alert("Desculpe, precisamos de permissão para acessar suas fotos!");
@@ -44,7 +48,7 @@ export default function RegisterMissingScreen({ navigation }) {
   };
 
   const handleSubmit = () => {
-    // Implement submit logic here
+
     console.log({
       title,
       type,
@@ -60,29 +64,15 @@ export default function RegisterMissingScreen({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation?.goBack()}
-        >
-          <Ionicons name="chevron-back" size={28} color="#222" />
-        </TouchableOpacity>
-        <Image
-          source={require("../../../assets/logo.png")}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </View>
+      <Header
+        title="Cadastrar Desaparecido"
+        description="Abaixo consta uma lista de desaparecidos na sua região. Nos auxilie nas buscas e venha fazer parte dessa comunidade."
+        leftIcon="menu"
+        onLeftPress={() => setMenuVisible(true)}
+        showLogo={true}
+      />
 
       <ScrollView contentContainerStyle={styles.container}>
-        {/* Title Section */}
-        <Text style={styles.mainTitle}>Cadastrar desaparecido</Text>
-        <Text style={styles.subtitle}>
-          Insira os dados solicitados abaixo.{"\n"}
-          Quanto mais informações melhor.
-        </Text>
-
         {/* Title Input */}
         <Text style={styles.label}>Título</Text>
         <TextInput
@@ -204,6 +194,14 @@ export default function RegisterMissingScreen({ navigation }) {
       <TouchableOpacity style={styles.fab} onPress={handleSubmit}>
         <Ionicons name="add" size={32} color="#fff" />
       </TouchableOpacity>
+
+      {isMenuVisible && (
+        <Menu
+          visible={isMenuVisible}
+          onClose={() => setMenuVisible(false)}
+          navigation={navigation}
+        />
+      )}
     </View>
   );
 }

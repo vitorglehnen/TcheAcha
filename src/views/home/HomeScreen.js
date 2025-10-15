@@ -49,7 +49,6 @@ const HomeScreen = ({ navigation }) => {
   }, []);
 
   const handleAddPress = () => navigation?.navigate("RegisterMissing");
-  const handleProfilePress = () => navigation?.navigate("Profile");
   const handleMapPress = () => navigation?.navigate("Map");
 
   const handleDetailsPress = async (caso) => {
@@ -73,19 +72,19 @@ const HomeScreen = ({ navigation }) => {
     const statusesQueMostramModal = ["NAO_VERIFICADO", "REJEITADO"];
 
     // Se houver erro, não encontrar o usuário, ou o status for um dos definidos acima, mostra o modal
-    if (
-      error ||
-      !data ||
-      statusesQueMostramModal.includes(data.status_verificacao)
-    ) {
+    //if (
+    //  error ||
+    //  !data ||
+    //  statusesQueMostramModal.includes(data.status_verificacao)
+    //) {
       setShowVerifyModal(true);
-      return;
-    }
+      //return;
+    //}
 
     // Se o status for 'APROVADO', permite a navegação
-    if (data.status_verificacao === "APROVADO") {
+    //if (data.status_verificacao === "APROVADO") {
       navigation?.navigate("CaseDetail", { casoId: caso.id });
-    }
+    //}
   };
 
   return (
@@ -171,7 +170,6 @@ const HomeScreen = ({ navigation }) => {
       <NavBar
         activeScreen="Home"
         onAddPress={handleAddPress}
-        onProfilePress={handleProfilePress}
       />
 
       {isMenuVisible && (
@@ -206,8 +204,7 @@ const HomeScreen = ({ navigation }) => {
             <View style={modalStyles.row}>
               <Pressable
                 style={[modalStyles.button, modalStyles.secondary]}
-                onPress={() => setShowVerifyModal(false)}
-              >
+                onPress={() => setShowVerifyModal(false)}>
                 <Text style={modalStyles.secondaryText}>AGORA NÃO</Text>
               </Pressable>
 

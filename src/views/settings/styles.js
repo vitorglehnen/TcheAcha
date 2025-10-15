@@ -1,12 +1,6 @@
 import { StyleSheet } from "react-native";
 
 export default StyleSheet.create({
-  header: {
-    paddingTop: 20,
-    paddingHorizontal: 16,
-    paddingBottom: 10,
-    backgroundColor: "#fff",
-  },
   backButton: {
     width: 40,
     height: 40,
@@ -18,19 +12,6 @@ export default StyleSheet.create({
     backgroundColor: "#fff",
     flexGrow: 1,
     alignItems: "center",
-  },
-  logo: {
-    width: 80,
-    height: 80,
-    marginBottom: 8,
-    marginTop: 8,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 18,
-    color: "#222",
-    textAlign: "center",
   },
   section: {
     backgroundColor: "#fff",
