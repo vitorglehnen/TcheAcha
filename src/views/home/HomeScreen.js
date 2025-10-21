@@ -72,19 +72,19 @@ const HomeScreen = ({ navigation }) => {
     const statusesQueMostramModal = ["NAO_VERIFICADO", "REJEITADO"];
 
     // Se houver erro, não encontrar o usuário, ou o status for um dos definidos acima, mostra o modal
-    //if (
-    //  error ||
-    //  !data ||
-    //  statusesQueMostramModal.includes(data.status_verificacao)
-    //) {
+    if (
+      error ||
+      !data ||
+      statusesQueMostramModal.includes(data.status_verificacao)
+    ) {
       setShowVerifyModal(true);
-      //return;
-    //}
+      return;
+    }
 
     // Se o status for 'APROVADO', permite a navegação
-    //if (data.status_verificacao === "APROVADO") {
+    if (data.status_verificacao === "APROVADO") {
       navigation?.navigate("CaseDetail", { casoId: caso.id });
-    //}
+    }
   };
 
   return (

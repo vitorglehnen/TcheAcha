@@ -9,7 +9,7 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-//import * as ImagePicker from "expo-image-picker";
+import * as ImagePicker from "expo-image-picker";
 import styles from "./styles";
 import Header from "../../components/header/Header";
 import Menu from "../../components/menu/Menu";
