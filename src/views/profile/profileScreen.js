@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
     View,
     Text,
@@ -11,6 +11,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "./styles";
 import NavBar from "../../components/navbar/NavBar";
+import Header from "../../components/header/Header";
+import Menu from "../../components/menu/Menu";
 
 const userData = {
     name: "Fulano de tal",
@@ -24,6 +26,8 @@ const userData = {
 };
 
 export default function ProfileScreen({ navigation }) {
+    const [isMenuVisible, setMenuVisible] = useState(false);
+
     // Funções de placeholder para futuras implementações
     const handleGoBack = () => {
         // Lógica para voltar para a tela anterior
@@ -38,20 +42,15 @@ export default function ProfileScreen({ navigation }) {
     }
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <SafeAreaView style={styles.safeArea}>        
             <StatusBar barStyle="light-content" backgroundColor="#03A9F4" />
             <View style={styles.container}>
-                {/* Cabeçalho */}
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={handleGoBack}>
-                        <Ionicons name="arrow-back" size={28} color="white" />
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Seu Perfil</Text>
-                    <TouchableOpacity onPress={handleSettings}>
-                        <Ionicons name="settings-outline" size={28} color="white" />
-                    </TouchableOpacity>
-                </View>
-
+                <Header
+                    title="Perfil"
+                    leftIcon="menu"
+                    onLeftPress={() => setMenuVisible(true)}
+                    showLogo={true}
+                />
                 {/* Conteúdo Principal */}
                 <View style={styles.profileContent}>
                     {/* Avatar e Infos */}
@@ -132,9 +131,16 @@ export default function ProfileScreen({ navigation }) {
             {/* Bottom Navigation */}
             <NavBar
                 onHomePress={() => navigation?.navigate('Home')}
-                onProfilePress={() => navigation?.navigate('Profile')}
                 activeScreen="Settings"
             />
+
+            {isMenuVisible && (
+                <Menu
+                visible={isMenuVisible}
+                onClose={() => setMenuVisible(false)}
+                navigation={navigation}
+                />
+            )}
         </SafeAreaView>
     );
 }

@@ -1,23 +1,23 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
 import NavBar from "../../components/navbar/NavBar";
+import Header from "../../components/header/Header";
+import Menu from "../../components/menu/Menu";
 
 export default function SettingsScreen({ navigation }) {
+  const [isMenuVisible, setMenuVisible] = useState(false);
+
   return (
     <View style={{ flex: 1, backgroundColor: '#fff' }}>
-      <ScrollView contentContainerStyle={styles.container}>
-        {/* Logo */}
-        <Image
-        source={require("../../../assets/logo.png")}
-        style={styles.logo}
-        resizeMode="contain"
+      <Header
+          title="Configurações"
+          leftIcon="menu"
+          onLeftPress={() => setMenuVisible(true)}
+          showLogo={true}
       />
-
-      {/* Title */}
-      <Text style={styles.title}>Configurações</Text>
-
+      <ScrollView contentContainerStyle={styles.container}>      
       {/* Account Section */}
       <View style={styles.section}>
         <TouchableOpacity style={styles.item}>
@@ -80,6 +80,8 @@ export default function SettingsScreen({ navigation }) {
         <Text style={styles.logoutText}>Sair do aplicativo</Text>
         <Ionicons name="exit-outline" size={22} color="#e74c3c" />
       </TouchableOpacity>
+      
+      <View style={{ height: 40 }} />
     </ScrollView>
 
     {/* Bottom Navigation */}
@@ -88,6 +90,14 @@ export default function SettingsScreen({ navigation }) {
       onProfilePress={() => navigation?.navigate('Profile')}
       activeScreen="Settings"
     />
+
+    {isMenuVisible && (
+        <Menu
+          visible={isMenuVisible}
+          onClose={() => setMenuVisible(false)}
+          navigation={navigation}
+        />
+    )}
     </View>
   );
 }

@@ -128,7 +128,7 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   detailsButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: '#333',
     paddingVertical: 12,
     borderRadius: 8,
     marginTop: 12,

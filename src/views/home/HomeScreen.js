@@ -49,7 +49,6 @@ const HomeScreen = ({ navigation }) => {
   }, []);
 
   const handleAddPress = () => navigation?.navigate("RegisterMissing");
-  const handleProfilePress = () => navigation?.navigate("Profile");
   const handleMapPress = () => navigation?.navigate("Map");
 
   const handleDetailsPress = async (caso) => {
@@ -171,7 +170,6 @@ const HomeScreen = ({ navigation }) => {
       <NavBar
         activeScreen="Home"
         onAddPress={handleAddPress}
-        onProfilePress={handleProfilePress}
       />
 
       {isMenuVisible && (
@@ -206,8 +204,7 @@ const HomeScreen = ({ navigation }) => {
             <View style={modalStyles.row}>
               <Pressable
                 style={[modalStyles.button, modalStyles.secondary]}
-                onPress={() => setShowVerifyModal(false)}
-              >
+                onPress={() => setShowVerifyModal(false)}>
                 <Text style={modalStyles.secondaryText}>AGORA NÃO</Text>
               </Pressable>
 

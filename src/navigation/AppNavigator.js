@@ -11,14 +11,14 @@ import LoginScreen from "../views/login/LoginScreen";
 import HomeScreen from "../views/home/HomeScreen";
 import RegisterScreen from "../views/register/RegisterScreen";
 import ProfileScreen from "../views/profile/profileScreen";
-// //import MapScreen from "../views/map/MapScreen";
+import MapScreen from "../views/map/MapScreen";
 import SettingsScreen from "../views/settings/SettingsScreen";
 import RegisterMissingScreen from "../views/registerMissing/RegisterMissingScreen";
 import ForgotPasswordScreen from "../views/forgotPassword/ForgotPasswordScreen";
 import ResetPasswordScreen from "../views/resetPassword/ResetPasswordScreen";
-// import VerifyIdentityScreen from "../views/verification/VerifyIdentityScreen";
-// import DocumentCaptureScreen from "../views/verification/DocumentCaptureScreen";
-// import SelfieCaptureScreen from '../views/verification/SelfieCaptureScreen';
+import VerifyIdentityScreen from "../views/verification/VerifyIdentityScreen";
+import DocumentCaptureScreen from "../views/verification/DocumentCaptureScreen";
+import SelfieCaptureScreen from '../views/verification/SelfieCaptureScreen';
 import CaseDetailScreen from "../views/caseDetail/caseDetails";
 
 const Stack = createNativeStackNavigator();
