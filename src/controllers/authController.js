@@ -107,3 +107,11 @@ export const updateUserPassword = async (newPassword) => {
 
   console.log("Senha atualizada com sucesso.");
 };
+
+export const signOut = async () => {
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    console.error("Erro ao fazer logout:", error);
+    throw error;
+  }
+};

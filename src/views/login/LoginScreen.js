@@ -9,13 +9,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { makeRedirectUri } from "expo-auth-session";
-import * as WebBrowser from "expo-web-browser";
-import { supabase } from "../../lib/supabase";
-import { signIn } from "../../controllers/authController";
+import { signIn, signInWithGoogle } from "../../controllers/authController";
 import { styles } from "./LoginScreen.styles";
-
-WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -42,39 +37,9 @@ export default function LoginScreen({ navigation }) {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      const redirectTo = makeRedirectUri({
-        scheme: "tcheacha",
-        useProxy: true,
-      });
-
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo,
-          skipBrowserRedirect: true,
-        },
-      });
-
-      if (error) throw error;
-
-      const authUrl = data?.url;
-      if (!authUrl) throw new Error("Nenhuma URL de autenticação retornada");
-
-      const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectTo);
-
-      if (result.type === "success" && result.url) {
-        const url = new URL(result.url);
-        const code = url.searchParams.get("code");
-
-        if (code) {
-          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-          if (exchangeError) throw exchangeError;
-        } else {
-          throw new Error("Código de autorização não encontrado na URL de retorno.");
-        }
-      }
-    } catch (err) {
-      Alert.alert("Erro no Login", err.message ?? "Ocorreu um erro inesperado.");
+      await signInWithGoogle();
+    } catch (error) {
+      Alert.alert("Erro no Login", error.message);
     } finally {
       setLoading(false);
     }
