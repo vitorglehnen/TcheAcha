@@ -5,13 +5,12 @@ import { Platform } from "react-native";
 import { supabase } from "../lib/supabase";
 import * as Linking from 'expo-linking'; 
 
-
 import BeforeLogin from "../views/before_login/BeforeLogin";
 import LoginScreen from "../views/login/LoginScreen";
 import HomeScreen from "../views/home/HomeScreen";
 import RegisterScreen from "../views/register/RegisterScreen";
 import ProfileScreen from "../views/profile/profileScreen";
-import MapScreen from "../views/map/MapScreen";
+//import MapScreen from "../views/map/MapScreen";
 import SettingsScreen from "../views/settings/SettingsScreen";
 import RegisterMissingScreen from "../views/registerMissing/RegisterMissingScreen";
 import ForgotPasswordScreen from "../views/forgotPassword/ForgotPasswordScreen";
@@ -48,8 +47,6 @@ export default function AppNavigator() {
     // Escuta mudanças no estado de autenticação
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        // console.log("onAuthStateChange event:", event);
-        // console.log("onAuthStateChange session:", session);
         setSession(session);
 
         // Navega para ResetPassword se o evento for de recuperação de senha
