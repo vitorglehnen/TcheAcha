@@ -93,7 +93,7 @@ export const fetchSightingsByCaseId = async (caseId) => {
 export const fetchCommentsByCaseId = async (caseId) => {
   console.log(`DAO: Buscando comentários para o caso ID: ${caseId}`);
    if (!caseId) throw new Error("ID do caso é inválido.");
-
+     
   const { data, error } = await supabase
     .from('comentarios')
     .select(`
