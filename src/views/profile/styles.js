@@ -159,4 +159,82 @@ export const styles = StyleSheet.create({
         marginTop: 5,
         textTransform: "capitalize",
     },
+    verifyHint: {
+        fontSize: 12,
+        color: "#03A9F4",
+        marginTop: 8,
+        fontWeight: "500",
+    },
+    // Estilos do Modal
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    modalContent: {
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 20,
+        width: "85%",
+        maxWidth: 400,
+        elevation: 5,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+    },
+    modalHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 20,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        color: "#333",
+    },
+    closeButton: {
+        padding: 5,
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: "#e0e0e0",
+        borderRadius: 10,
+        padding: 12,
+        fontSize: 16,
+        marginBottom: 20,
+        backgroundColor: "#f8f9fa",
+    },
+    modalButtons: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        gap: 10,
+    },
+    modalButton: {
+        flex: 1,
+        padding: 12,
+        borderRadius: 10,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    cancelButton: {
+        backgroundColor: "#f8f9fa",
+        borderWidth: 1,
+        borderColor: "#e0e0e0",
+    },
+    cancelButtonText: {
+        color: "#6c757d",
+        fontSize: 16,
+        fontWeight: "600",
+    },
+    saveButton: {
+        backgroundColor: "#03A9F4",
+    },
+    saveButtonText: {
+        color: "white",
+        fontSize: 16,
+        fontWeight: "600",
+    },
 });

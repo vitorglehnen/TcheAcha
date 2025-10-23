@@ -41,6 +41,76 @@ export const getCurrentUser = async () => {
   return user;
 };
 
+export const getUserData = async () => {
+  try {
+    // Primeiro, obtém o usuário autenticado
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      console.error("Erro ao obter usuário autenticado:", authError);
+      throw new Error("Usuário não autenticado");
+    }
+
+    // Busca os dados completos do usuário na tabela usuarios
+    const { data: userData, error: dbError } = await supabase
+      .from("usuarios")
+      .select("*")
+      .eq("auth_user_id", user.id)
+      .single();
+
+    if (dbError) {
+      console.error("Erro ao buscar dados do usuário:", dbError);
+      throw new Error(dbError.message);
+    }
+
+    console.log("Dados do usuário obtidos:", userData);
+    return userData;
+  } catch (error) {
+    console.error("Erro em getUserData:", error);
+    throw error;
+  }
+};
+
+export const updateUserProfile = async (updates) => {
+  try {
+    // Obtém o usuário autenticado
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      console.error("Erro ao obter usuário autenticado:", authError);
+      throw new Error("Usuário não autenticado");
+    }
+
+    // Atualiza os dados na tabela usuarios
+    const { data, error: updateError } = await supabase
+      .from("usuarios")
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("auth_user_id", user.id)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error("Erro ao atualizar perfil do usuário:", updateError);
+      throw new Error(updateError.message);
+    }
+
+    console.log("Perfil atualizado com sucesso:", data);
+    return data;
+  } catch (error) {
+    console.error("Erro em updateUserProfile:", error);
+    throw error;
+  }
+};
+
 export const signUp = async (nome, email, senha) => {
   console.log("Iniciando processo de signUp para:", { email, nome });
 
