@@ -9,18 +9,24 @@ import {
     StatusBar,
     ActivityIndicator,
     Alert,
+    TextInput,
+    Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "./styles";
 import NavBar from "../../components/navbar/NavBar";
 import Header from "../../components/header/Header";
 import Menu from "../../components/menu/Menu";
-import { getUserData } from "../../controllers/authController";
+import { getUserData, updateUserProfile } from "../../controllers/authController";
 
 export default function ProfileScreen({ navigation }) {
     const [isMenuVisible, setMenuVisible] = useState(false);
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [editModalVisible, setEditModalVisible] = useState(false);
+    const [editField, setEditField] = useState("");
+    const [editValue, setEditValue] = useState("");
+    const [updating, setUpdating] = useState(false);
 
     // Carrega os dados do usuário ao montar o componente
     useEffect(() => {
@@ -43,13 +49,90 @@ export default function ProfileScreen({ navigation }) {
         }
     };
 
+    const handleEdit = (field) => {
+        if (field === "phone") {
+            setEditField("telefone");
+            setEditValue(userData.telefone || "");
+        } else if (field === "name") {
+            setEditField("nome_completo");
+            setEditValue(userData.nome_completo || "");
+        }
+        setEditModalVisible(true);
+    };
+
+    const handleSaveEdit = async () => {
+        if (!editValue.trim()) {
+            Alert.alert("Erro", "O campo não pode estar vazio");
+            return;
+        }
+
+        // Validação básica de telefone
+        if (editField === "telefone") {
+            const phoneRegex = /^\+?[0-9\s\-()]+$/;
+            if (!phoneRegex.test(editValue)) {
+                Alert.alert("Erro", "Formato de telefone inválido");
+                return;
+            }
+        }
+
+        try {
+            setUpdating(true);
+            const updatedData = await updateUserProfile({
+                [editField]: editValue.trim()
+            });
+            setUserData(updatedData);
+            setEditModalVisible(false);
+            Alert.alert("Sucesso", "Dados atualizados com sucesso!");
+        } catch (error) {
+            console.error("Erro ao atualizar dados:", error);
+            Alert.alert("Erro", "Não foi possível atualizar os dados. Tente novamente.");
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    const handleDocumentVerification = () => {
+        // Se o status for NAO_VERIFICADO ou REPROVADO, redireciona para verificação
+        if (userData.status_verificacao === "NAO_VERIFICADO" || 
+            userData.status_verificacao === "REPROVADO") {
+            navigation.navigate("VerifyIdentity");
+        } else if (userData.status_verificacao === "PENDENTE") {
+            Alert.alert(
+                "Verificação Pendente",
+                "Seus documentos estão em análise. Aguarde a aprovação."
+            );
+        } else if (userData.status_verificacao === "APROVADO") {
+            Alert.alert(
+                "Verificação Aprovada",
+                "Seus documentos já foram verificados e aprovados!"
+            );
+        }
+    };
+
+    const getStatusVerificacaoTexto = (status) => {
+        const statusMap = {
+            "NAO_VERIFICADO": "não verificado",
+            "PENDENTE": "pendente",
+            "APROVADO": "aprovado",
+            "REPROVADO": "reprovado"
+        };
+        return statusMap[status] || "não verificado";
+    };
+
+    const getStatusVerificacaoIcone = (status) => {
+        if (status === "APROVADO") {
+            return { name: "checkmark-circle", color: "#28a745" };
+        } else if (status === "PENDENTE") {
+            return { name: "time-outline", color: "#ffc107" };
+        } else if (status === "REPROVADO") {
+            return { name: "close-circle", color: "#dc3545" };
+        }
+        return { name: "alert-circle", color: "#6c757d" };
+    };
+
     // Funções de placeholder para futuras implementações
     const handleGoBack = () => {
         // Lógica para voltar para a tela anterior
-    };
-
-    const handleEdit = (field) => {
-        console.log(`Editar campo: ${field}`);
     };
 
     const handleSettings = () => {
@@ -140,7 +223,7 @@ export default function ProfileScreen({ navigation }) {
                     <View style={styles.userInfo}>
                         <View style={styles.userNameContainer}>
                             <Text style={styles.userName}>{userData.nome_completo || "Usuário"}</Text>
-                            {userData.verificado && (
+                            {userData.status_verificacao === "APROVADO" && (
                                 <Ionicons
                                     name="checkmark-circle"
                                     size={20}
@@ -184,19 +267,27 @@ export default function ProfileScreen({ navigation }) {
 
                     {/* Status Cards */}
                     <View style={styles.statusCardsContainer}>
-                        <View style={styles.statusCard}>
+                        <TouchableOpacity 
+                            style={styles.statusCard}
+                            onPress={handleDocumentVerification}
+                            activeOpacity={0.7}
+                        >
                             <Text style={styles.cardTitle}>Status validação dos documentos</Text>
                             <View style={styles.statusIconContainer}>
                                 <Ionicons 
-                                    name="checkmark-circle" 
+                                    name={getStatusVerificacaoIcone(userData.status_verificacao).name}
                                     size={40} 
-                                    color={userData.documentos_verificados ? "#28a745" : "#ffc107"} 
+                                    color={getStatusVerificacaoIcone(userData.status_verificacao).color}
                                 />
                             </View>
                             <Text style={styles.statusText}>
-                                {userData.documentos_verificados ? "aprovado" : "pendente"}
+                                {getStatusVerificacaoTexto(userData.status_verificacao)}
                             </Text>
-                        </View>
+                            {(userData.status_verificacao === "NAO_VERIFICADO" || 
+                              userData.status_verificacao === "REPROVADO") && (
+                                <Text style={styles.verifyHint}>Toque para verificar</Text>
+                            )}
+                        </TouchableOpacity>
 
                         <View style={styles.statusCard}>
                             <Text style={styles.cardTitle}>Última verificação de localização</Text>
@@ -226,6 +317,60 @@ export default function ProfileScreen({ navigation }) {
                 navigation={navigation}
                 />
             )}
+
+            {/* Modal de Edição */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={editModalVisible}
+                onRequestClose={() => setEditModalVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>
+                                {editField === "telefone" ? "Editar Telefone" : "Editar Nome"}
+                            </Text>
+                            <TouchableOpacity
+                                onPress={() => setEditModalVisible(false)}
+                                style={styles.closeButton}
+                            >
+                                <Ionicons name="close" size={24} color="#333" />
+                            </TouchableOpacity>
+                        </View>
+                        
+                        <TextInput
+                            style={styles.input}
+                            value={editValue}
+                            onChangeText={setEditValue}
+                            placeholder={editField === "telefone" ? "+55 51 99999-9999" : "Nome Completo"}
+                            keyboardType={editField === "telefone" ? "phone-pad" : "default"}
+                            autoFocus
+                        />
+
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.cancelButton]}
+                                onPress={() => setEditModalVisible(false)}
+                            >
+                                <Text style={styles.cancelButtonText}>Cancelar</Text>
+                            </TouchableOpacity>
+                            
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.saveButton]}
+                                onPress={handleSaveEdit}
+                                disabled={updating}
+                            >
+                                {updating ? (
+                                    <ActivityIndicator color="#fff" />
+                                ) : (
+                                    <Text style={styles.saveButtonText}>Salvar</Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
