@@ -54,7 +54,6 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   statusBadge: {
-    backgroundColor: '#28a745',
     borderRadius: 12,
     paddingVertical: 4,
     paddingHorizontal: 10,
@@ -80,9 +79,25 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.textSecondary,
     textAlign: 'center',
+    marginTop: 2,
+  },
+  detailText: {
+    color: COLORS.textPrimary,
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  detailLabel: { 
+    fontWeight: 'bold',
   },
   timelineContainer: {
     paddingHorizontal: 15,
+    marginTop: 10,
+  },
+  timelineSectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.textPrimary,
+    marginBottom: 15,
   },
   timelineItem: {
     backgroundColor: COLORS.white,
@@ -96,26 +111,24 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  checkCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#ccc',
-    marginRight: 10,
-  },
   timelineTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: COLORS.textPrimary,
     flex: 1,
+    marginHorizontal: 5,
+  },
+  timelineDate: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
   },
   timelineContent: {
-    paddingLeft: 34,
+    paddingLeft: 34, 
     marginTop: 8,
   },
   timelineDescription: {
     fontSize: 14,
     color: '#666',
+    lineHeight: 18,
   },
 });
