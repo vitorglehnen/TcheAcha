@@ -7,10 +7,15 @@ import {
   Image,
   Alert,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { signIn, signInWithGoogle } from "../../controllers/authController";
+import { signIn } from "../../controllers/authController";
 import { styles } from "./LoginScreen.styles";
+import { makeRedirectUri } from "expo-auth-session";
+import * as WebBrowser from "expo-web-browser";
+import Constants from "expo-constants";
+import { supabase } from "../../lib/supabase";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -37,9 +42,45 @@ export default function LoginScreen({ navigation }) {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      await signInWithGoogle();
-    } catch (error) {
-      Alert.alert("Erro no Login", error.message);
+      if (Platform.OS === "web") {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+        });
+        if (error) throw error;
+      } else {
+        const isExpoGo = Constants.appOwnership === "expo";
+        const redirectTo = makeRedirectUri({
+          useProxy: isExpoGo,
+          scheme: "tcheacha",
+          path: "auth/callback",
+        });
+        console.log("URL de Redirecionamento:", redirectTo);
+
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo,
+            skipBrowserRedirect: true,
+            queryParams: { access_type: "offline", prompt: "consent" },
+          },
+        });
+
+        if (error) throw error;
+        const authUrl = data?.url;
+        if (!authUrl) throw new Error("Nenhuma URL de autenticação retornada");
+
+        const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectTo);
+
+        if (result.type === "success" && result.url) {
+          const { searchParams } = new URL(result.url);
+          const code = searchParams.get("code");
+          if (code) {
+            await supabase.auth.exchangeCodeForSession(code);
+          }
+        }
+      }
+    } catch (err) {
+      Alert.alert("Erro inesperado", err.message ?? String(err));
     } finally {
       setLoading(false);
     }
