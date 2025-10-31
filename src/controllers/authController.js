@@ -21,19 +21,6 @@ export const signIn = async (email, password) => {
   return data;
 };
 
-export const signInWithGoogle = async () => {
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-  });
-
-  if (error) {
-    console.error("Erro ao autenticar com Google:", error.message);
-    throw error;
-  }
-
-  return data;
-};
-
 export const getCurrentUser = async () => {
   const {
     data: { user },
@@ -176,4 +163,12 @@ export const updateUserPassword = async (newPassword) => {
   }
 
   console.log("Senha atualizada com sucesso.");
+};
+
+export const signOut = async () => {
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    console.error("Erro ao fazer logout:", error);
+    throw error;
+  }
 };

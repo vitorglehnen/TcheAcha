@@ -7,15 +7,15 @@ import {
   Image,
   Alert,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { makeRedirectUri } from "expo-auth-session";
-import * as WebBrowser from "expo-web-browser";
-import { supabase } from "../../lib/supabase";
 import { signIn } from "../../controllers/authController";
 import { styles } from "./LoginScreen.styles";
-
-WebBrowser.maybeCompleteAuthSession();
+import { makeRedirectUri } from "expo-auth-session";
+import * as WebBrowser from "expo-web-browser";
+import Constants from "expo-constants";
+import { supabase } from "../../lib/supabase";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -42,39 +42,45 @@ export default function LoginScreen({ navigation }) {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      const redirectTo = makeRedirectUri({
-        scheme: "tcheacha",
-        useProxy: true,
-      });
+      if (Platform.OS === "web") {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+        });
+        if (error) throw error;
+      } else {
+        const isExpoGo = Constants.appOwnership === "expo";
+        const redirectTo = makeRedirectUri({
+          useProxy: isExpoGo,
+          scheme: "tcheacha",
+          path: "auth/callback",
+        });
+        console.log("URL de Redirecionamento:", redirectTo);
 
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo,
-          skipBrowserRedirect: true,
-        },
-      });
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo,
+            skipBrowserRedirect: true,
+            queryParams: { access_type: "offline", prompt: "consent" },
+          },
+        });
 
-      if (error) throw error;
+        if (error) throw error;
+        const authUrl = data?.url;
+        if (!authUrl) throw new Error("Nenhuma URL de autenticação retornada");
 
-      const authUrl = data?.url;
-      if (!authUrl) throw new Error("Nenhuma URL de autenticação retornada");
+        const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectTo);
 
-      const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectTo);
-
-      if (result.type === "success" && result.url) {
-        const url = new URL(result.url);
-        const code = url.searchParams.get("code");
-
-        if (code) {
-          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-          if (exchangeError) throw exchangeError;
-        } else {
-          throw new Error("Código de autorização não encontrado na URL de retorno.");
+        if (result.type === "success" && result.url) {
+          const { searchParams } = new URL(result.url);
+          const code = searchParams.get("code");
+          if (code) {
+            await supabase.auth.exchangeCodeForSession(code);
+          }
         }
       }
     } catch (err) {
-      Alert.alert("Erro no Login", err.message ?? "Ocorreu um erro inesperado.");
+      Alert.alert("Erro inesperado", err.message ?? String(err));
     } finally {
       setLoading(false);
     }

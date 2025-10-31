@@ -13,6 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './ResetPassword.styles';
 import { supabase } from '../../lib/supabase';
+import { getCurrentUser, signIn } from '../../controllers/authController';
 
 export default function ResetPasswordScreen({ navigation }) {
   const [password, setPassword] = useState('');
@@ -33,17 +34,26 @@ export default function ResetPasswordScreen({ navigation }) {
 
     setLoading(true);
     try {
+      const user = await getCurrentUser();
+      if (!user) {
+        Alert.alert('Erro', 'Não foi possível obter o usuário atual. Por favor, tente novamente.');
+        setLoading(false);
+        return;
+      }
+
       const { error } = await supabase.auth.updateUser({ password: password });
-      setLoading(false);
 
       if (error) {
+        setLoading(false);
         Alert.alert('Erro ao Redefinir Senha', error.message);
       } else {
+        await signIn(user.email, password);
+        setLoading(false);
         Alert.alert(
           'Sucesso',
-          'Sua senha foi redefinida com sucesso! Você será redirecionado para o login.'
+          'Sua senha foi redefinida com sucesso! Você será redirecionado para a tela inicial.'
         );
-        navigation.navigate('Login');
+        navigation.navigate('Home');
       }
     } catch (err) {
       setLoading(false);
