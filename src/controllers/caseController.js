@@ -1,9 +1,17 @@
 import {
   fetchActiveCases,
+  fetchCurrentUserProfile,
   fetchCaseDetailsById,
   fetchSightingsByCaseId,
-  fetchCommentsByCaseId
+  fetchCommentsByCaseId,
+  addComment,
+  addSighting,
+  addReport,
+  deleteComment,
+  deleteSighting 
 } from '../models/dao/CaseDao.js';
+import { supabase } from '../lib/supabase';
+import { decode } from 'base64-arraybuffer';
 
 /** Calcula a diferença em dias entre duas datas. */
 const calculateDaysDifference = (date1, date2) => {
@@ -13,60 +21,122 @@ const calculateDaysDifference = (date1, date2) => {
 
 /** Obtém a lista de casos ativos processados para a HomeScreen. */
 export const getActiveCasesForHome = async () => {
-  console.log("Controller: Solicitando casos ativos...");
   try {
     const cases = await fetchActiveCases();
     if (!cases) return [];
-
-    const processedCases = cases.map(caso => {
-      const disappearanceDate = new Date(caso.data_desaparecimento);
-      const today = new Date();
-      return { ...caso, diasDesaparecido: calculateDaysDifference(today, disappearanceDate) };
-    });
-    console.log("Controller: Casos processados para a Home.");
+    const processedCases = cases.map(caso => ({ ...caso, diasDesaparecido: calculateDaysDifference(new Date(), new Date(caso.data_desaparecimento)) }));
     return processedCases;
+  } catch (error) { throw error; }
+};
+
+/** Busca o status de verificação e o ID do perfil do usuário logado. */
+export const getCurrentUserStatusAndProfileId = async () => {
+  try {
+    const profile = await fetchCurrentUserProfile();
+    if (!profile) { return { isVerified: false, profileId: null }; }
+    return { isVerified: profile.status_verificacao === 'APROVADO', profileId: profile.id };
+  } catch (error) { throw error; }
+};
+
+/**
+ * Obtém os detalhes completos de um caso.
+ * Agora busca os avistamentos com base no ID do usuário.
+ */
+export const getCaseDetails = async (caseId, usuarioId) => {
+  try {
+    // Busca os dados em paralelo
+    const [caseDetails, sightings, comments] = await Promise.all([
+      fetchCaseDetailsById(caseId),
+      fetchSightingsByCaseId(caseId, usuarioId), // Passa o usuarioId para o DAO
+      fetchCommentsByCaseId(caseId)
+    ]);
+
+    let processedCaseDetails = caseDetails;
+    if (caseDetails) {
+        processedCaseDetails = { ...caseDetails, diasDesaparecido: calculateDaysDifference(new Date(), new Date(caseDetails.data_desaparecimento)) };
+    }
+    return { caseDetails: processedCaseDetails, sightings: sightings || [], comments: comments || [] };
   } catch (error) {
-    console.error("Controller: Erro ao obter casos para Home:", error.message);
+    throw error;
+  }
+};
+
+/** Cria um novo comentário. */
+export const createComment = async (caseId, autorId, conteudo) => {
+  if (!conteudo || conteudo.trim() === '') { throw new Error('O comentário não pode estar vazio.'); }
+  if (!caseId || !autorId) { throw new Error('Dados insuficientes para criar comentário.'); }
+  try { return await addComment(caseId, autorId, conteudo); }
+  catch (error) { throw error; }
+};
+
+/** Cria um novo avistamento. */
+export const createSighting = async (sightingData) => {
+  const { caseId, usuarioId, descricao, imageBase64, location, dataAvistamento } = sightingData;
+  if (!caseId || !usuarioId || !descricao || !location || !dataAvistamento) { throw new Error('Dados insuficientes. Localização, data e descrição são obrigatórios.'); }
+
+  let fotoUrl = null;
+  if (imageBase64) {
+    try {
+      const fileExt = 'jpg';
+      const fileName = `${usuarioId}/${caseId}_${Date.now()}.${fileExt}`;
+      const arrayBuffer = decode(imageBase64); 
+      const { data: uploadData, error: uploadError } = await supabase.storage.from('avistamentos').upload(fileName, arrayBuffer, { contentType: 'image/jpeg', upsert: false });
+      if (uploadError) throw uploadError;
+      const { data: publicUrlData } = supabase.storage.from('avistamentos').getPublicUrl(uploadData.path);
+      fotoUrl = publicUrlData.publicUrl;
+    } catch (uploadError) {
+      throw new Error(`Erro ao fazer upload da foto: ${uploadError.message}`);
+    }
+  }
+
+  const locationString = `POINT(${location.longitude} ${location.latitude})`;
+
+  try {
+    return await addSighting({ caseId, usuarioId, descricao, fotoUrl, dataAvistamento, locationString });
+  } catch (dbError) { throw dbError; }
+};
+
+/**
+ * Cria uma nova denúncia.
+ * @param {'CASO' | 'COMENTARIO' | 'USUARIO'} tipo - O tipo de conteúdo
+ * @param {string} idConteudo - O UUID do conteúdo a ser denunciado
+ * @param {string} motivo - A razão da denúncia
+ * @param {string} denuncianteId - O ID do perfil ('usuarios') de quem denuncia
+ */
+export const reportContent = async (tipo, idConteudo, motivo, denuncianteId) => {
+  if (!tipo || !idConteudo || !motivo || !denuncianteId) {
+    throw new Error('Dados insuficientes para criar denúncia.');
+  }
+  try {
+    return await addReport({
+      denunciante_id: denuncianteId,
+      tipo_conteudo: tipo,
+      id_conteudo: idConteudo,
+      motivo: motivo
+    });
+  } catch (error) {
     throw error;
   }
 };
 
 /**
- * Obtém os detalhes completos de um caso, incluindo avistamentos e comentários.
- * @param {string} caseId O UUID do caso.
- * @returns {Promise<object>} Um objeto contendo { caseDetails, sightings, comments }.
- * @throws {Error} Lança um erro se alguma das buscas no DAO falhar.
+ * Exclui um comentário do usuário.
  */
-export const getCaseDetails = async (caseId) => {
-  console.log(`Controller: Solicitando detalhes para o caso ID: ${caseId}`);
+export const deleteUserComment = async (commentId, autorId) => {
   try {
-    // Busca os dados em paralelo para otimizar
-    const [caseDetails, sightings, comments] = await Promise.all([
-      fetchCaseDetailsById(caseId),
-      fetchSightingsByCaseId(caseId),
-      fetchCommentsByCaseId(caseId)
-    ]);
-
-    // Calcula dias desaparecido para este caso específico
-    let processedCaseDetails = caseDetails;
-    if (caseDetails) {
-        const disappearanceDate = new Date(caseDetails.data_desaparecimento);
-        const today = new Date();
-        processedCaseDetails = {
-            ...caseDetails,
-            diasDesaparecido: calculateDaysDifference(today, disappearanceDate)
-        };
-    }
-
-    console.log(`Controller: Detalhes completos obtidos para o caso ${caseId}.`);
-    return {
-      caseDetails: processedCaseDetails,
-      sightings: sightings || [], // Garante que seja sempre um array
-      comments: comments || []   // Garante que seja sempre um array
-    };
-
+    return await deleteComment(commentId, autorId);
   } catch (error) {
-    console.error(`Controller: Erro ao obter detalhes do caso ${caseId}:`, error.message);
-    throw error; // Re-lança para ser tratado pela View
+    throw error;
+  }
+};
+
+/**
+ * Exclui um avistamento do usuário.
+ */
+export const deleteUserSighting = async (sightingId, autorId) => {
+  try {
+    return await deleteSighting(sightingId, autorId);
+  } catch (error) {
+    throw error;
   }
 };

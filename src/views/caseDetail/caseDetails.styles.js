@@ -1,34 +1,12 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { COLORS } from '../../styles/globalStyles';
+
+const { width, height } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: 50,
-    paddingBottom: 15,
-    paddingHorizontal: 15,
-    backgroundColor: COLORS.white,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  backButton: {
-    position: 'absolute',
-    left: 15,
-    top: 50,
-    bottom: 15,
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: COLORS.textPrimary,
   },
   caseCard: {
     backgroundColor: COLORS.white,
@@ -89,6 +67,31 @@ export const styles = StyleSheet.create({
   detailLabel: { 
     fontWeight: 'bold',
   },
+  reportCaseButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    padding: 5,
+  },
+  sightingButtonContainer: {
+    marginHorizontal: 15,
+    marginBottom: 15,
+  },
+  sightingButton: {
+    backgroundColor: COLORS.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 8,
+    elevation: 2,
+  },
+  sightingButtonText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
   timelineContainer: {
     paddingHorizontal: 15,
     marginTop: 10,
@@ -122,6 +125,18 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.textSecondary,
   },
+  statusIndicator: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    fontStyle: 'italic',
+    marginRight: 5,
+  },
+  pendingStatus: {
+    color: '#f39c12',
+  },
+  rejectedStatus: {
+    color: '#e74c3c',
+  },
   timelineContent: {
     paddingLeft: 34, 
     marginTop: 8,
@@ -131,4 +146,162 @@ export const styles = StyleSheet.create({
     color: '#666',
     lineHeight: 18,
   },
+  sightingImage: {
+    width: '100%',
+    height: 150,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  timelineActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 15,
+  },
+  deleteButtonText: {
+    color: '#e74c3c',
+    fontSize: 12,
+    marginLeft: 5,
+  },
+  reportButtonText: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    marginLeft: 5,
+  },
+  commentInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+    padding: 10,
+  },
+  commentInput: {
+    flex: 1,
+    minHeight: 40,
+    maxHeight: 100,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    fontSize: 14,
+    backgroundColor: '#f9f9f9',
+  },
+  commentSendButton: {
+    padding: 10,
+    marginLeft: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContainer: {
+    width: '100%',
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    padding: 20,
+    maxHeight: '90%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.textPrimary,
+  },
+  modalInput: {
+    minHeight: 100,
+    maxHeight: 150,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 10,
+    textAlignVertical: 'top',
+    fontSize: 14,
+    marginBottom: 15,
+  },
+  modalButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  modalButtonText: {
+    fontSize: 14,
+    color: COLORS.textPrimary,
+    marginLeft: 10,
+  },
+  imagePreviewContainer: {
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  modalImagePreview: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: '#e74c3c',
+    borderRadius: 10,
+    padding: 3,
+  },
+  modalDateText: {
+    fontSize: 14,
+    color: COLORS.textPrimary,
+  },
+  modalLocationText: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginLeft: 10,
+  },
+  submitButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  submitButtonText: {
+    color: COLORS.white,
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  imageZoomBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imageZoom: {
+    width: width * 0.9,
+    height: height * 0.7,
+  },
+  closeZoomButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    padding: 10,
+  }
 });
