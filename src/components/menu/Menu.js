@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Text, TouchableOpacity, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
@@ -44,6 +43,28 @@ const Menu = ({ visible, onClose, navigation }) => {
           <TouchableOpacity 
             style={styles.menuItem} 
             onPress={() => {
+              navigation.navigate('MyCases');
+              onClose();
+            }}
+          >
+            <Ionicons name="briefcase-outline" size={24} color="#1A233D" />
+            <Text style={styles.menuItemText}>Meus Casos</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.menuItem} 
+            onPress={() => {
+              navigation.navigate('RegisterCase');
+              onClose();
+            }}
+          >
+            <Ionicons name="add-circle-outline" size={24} color="#1A233D" />
+            <Text style={styles.menuItemText}>Cadastrar Desaparecido</Text>
+          </TouchableOpacity>  
+
+          <TouchableOpacity 
+            style={styles.menuItem} 
+            onPress={() => {
               navigation.navigate('Map');
               onClose();
             }}
@@ -72,28 +93,6 @@ const Menu = ({ visible, onClose, navigation }) => {
           >
             <Ionicons name="settings-outline" size={24} color="#1A233D" />
             <Text style={styles.menuItemText}>Configurações</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.menuItem} 
-            onPress={() => {
-              navigation.navigate('Register');
-              onClose();
-            }}
-          >
-            <Ionicons name="person-add-outline" size={24} color="#1A233D" />
-            <Text style={styles.menuItemText}>Registrar</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.menuItem} 
-            onPress={() => {
-              navigation.navigate('RegisterMissing');
-              onClose();
-            }}
-          >
-            <Ionicons name="add-circle-outline" size={24} color="#1A233D" />
-            <Text style={styles.menuItemText}>Cadastrar Desaparecido</Text>
           </TouchableOpacity>
 
           {/* Divider */}

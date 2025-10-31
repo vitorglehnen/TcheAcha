@@ -8,17 +8,17 @@ import * as Linking from 'expo-linking';
 import BeforeLogin from "../views/before_login/BeforeLogin";
 import LoginScreen from "../views/login/LoginScreen";
 import HomeScreen from "../views/home/HomeScreen";
-import RegisterScreen from "../views/register/RegisterScreen";
 import ProfileScreen from "../views/profile/profileScreen";
 //import MapScreen from "../views/map/MapScreen";
 import SettingsScreen from "../views/settings/SettingsScreen";
-import RegisterMissingScreen from "../views/registerMissing/RegisterMissingScreen";
+import RegisterCaseScreen from "../views/registerCase/RegisterCaseScreen";
 import ForgotPasswordScreen from "../views/forgotPassword/ForgotPasswordScreen";
 import ResetPasswordScreen from "../views/resetPassword/ResetPasswordScreen";
 import VerifyIdentityScreen from "../views/verification/VerifyIdentityScreen";
 import DocumentCaptureScreen from "../views/verification/DocumentCaptureScreen";
 import SelfieCaptureScreen from '../views/verification/SelfieCaptureScreen';
 import CaseDetailScreen from "../views/caseDetail/caseDetails";
+import MyCasesScreen from "../views/myCases/MyCasesScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -75,18 +75,19 @@ export default function AppNavigator() {
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="Profile" component={ProfileScreen} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
-            <Stack.Screen name="RegisterMissing" component={RegisterMissingScreen} />
+            <Stack.Screen name="RegisterCase" component={RegisterCaseScreen} />
             <Stack.Screen name="VerifyIdentity" component={VerifyIdentityScreen} />
             <Stack.Screen name="DocumentCapture" component={DocumentCaptureScreen} />
             <Stack.Screen name="SelfieCapture" component={SelfieCaptureScreen} />
             <Stack.Screen name="CaseDetail" component={CaseDetailScreen} />
+            {/*<Stack.Screen name="Map" component={MapScreen} />*/}
+            <Stack.Screen name="MyCases" component={MyCasesScreen} />
           </>
         ) : (
           <>
             {/* Telas de Autenticação e Públicas */}
             <Stack.Screen name="BeforeLogin" component={BeforeLogin} />
             <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
             <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
           </>
         )}

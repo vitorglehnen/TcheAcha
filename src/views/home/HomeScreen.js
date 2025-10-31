@@ -44,7 +44,7 @@ const HomeScreen = ({ navigation }) => {
     loadCases();
   }, []); // Roda apenas uma vez quando o componente monta
 
-  const handleAddPress = () => navigation?.navigate("RegisterMissing");
+  const handleAddPress = () => navigation?.navigate("RegisterCase");
   const handleMapPress = () => navigation?.navigate("Map");
 
   const handleDetailsPress = async (caso) => {
