@@ -1,28 +1,15 @@
 import { StyleSheet } from "react-native";
+import { COLORS } from '../../styles/globalStyles';
 
 export default StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingTop: 40,
-    paddingHorizontal: 16,
-    paddingBottom: 10,
-    backgroundColor: "#fff",
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "flex-start",
-  },
-  logo: {
-    width: 60,
-    height: 60,
+  safeArea: { 
+    flex: 1,
+    backgroundColor: COLORS.white,
   },
   container: {
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.white,
+    paddingBottom: 120,
   },
   mainTitle: {
     fontSize: 24,
@@ -56,12 +43,11 @@ export default StyleSheet.create({
   textArea: {
     height: 100,
     paddingTop: 12,
+    textAlignVertical: "top",
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 8,
   },
   halfWidth: {
     width: "48%",
@@ -77,7 +63,7 @@ export default StyleSheet.create({
     borderColor: "#ddd",
     borderRadius: 8,
     paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingVertical: 14,
     backgroundColor: "#fff",
   },
   pickerText: {
@@ -88,25 +74,51 @@ export default StyleSheet.create({
   statusActive: {
     color: "#00b4d8",
   },
+  datePickerButton: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    backgroundColor: "#fff",
+  },
+  datePickerText: {
+    fontSize: 14,
+    color: '#222',
+  },
   uploadButton: {
-    backgroundColor: "#ddd",
+    backgroundColor: "#f0f0f0",
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderRadius: 8,
     alignItems: "center",
     marginTop: 4,
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
   uploadButtonText: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#666",
+    color: "#555",
+  },
+  imagePreviewContainer: {
+    marginTop: 16,
+    alignItems: 'center',
   },
   previewImage: {
     width: "100%",
     height: 200,
     borderRadius: 8,
-    marginTop: 16,
     resizeMode: "cover",
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: -10,
+    right: -10,
+    backgroundColor: '#e74c3c',
+    borderRadius: 15,
+    padding: 5,
+    elevation: 2,
   },
   fab: {
     position: "absolute",
@@ -124,4 +136,7 @@ export default StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 5,
   },
+  fabDisabled: {
+    backgroundColor: "#ccc",
+  }
 });
