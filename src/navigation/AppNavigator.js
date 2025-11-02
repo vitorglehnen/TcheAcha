@@ -19,6 +19,7 @@ import DocumentCaptureScreen from "../views/verification/DocumentCaptureScreen";
 import SelfieCaptureScreen from '../views/verification/SelfieCaptureScreen';
 import CaseDetailScreen from "../views/caseDetail/caseDetails";
 import MyCasesScreen from "../views/myCases/MyCasesScreen";
+import RegisterScreen from "../views/register/RegisterScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -89,6 +90,7 @@ export default function AppNavigator() {
             <Stack.Screen name="BeforeLogin" component={BeforeLogin} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+            {/*<Stack.Screen name="Register" component={RegisterScreen} />*/}
           </>
         )}
         {/* Tela acessível em ambos os estados para recuperação de senha */}
