@@ -46,6 +46,7 @@ const formatCasesData = (cases) => {
 export const getActiveCasesForHome = async (userLatitude = null, userLongitude = null) => {
   try {
     console.log("Controller: Buscando casos ativos para a tela inicial...");
+    console.log("Controller: Parâmetros recebidos:", { userLatitude, userLongitude });
     
     // Se tiver localização do usuário, busca os mais próximos
     if (userLatitude !== null && userLongitude !== null) {
@@ -53,21 +54,26 @@ export const getActiveCasesForHome = async (userLatitude = null, userLongitude =
       
       try {
         const { data, error } = await supabase.rpc('get_nearby_cases', {
-          user_lat: userLatitude,
-          user_long: userLongitude
+          lat: userLatitude,
+          long: userLongitude
         });
 
         if (error) {
           console.error("Controller: Erro ao buscar casos próximos:", error);
+          console.error("Controller: Detalhes do erro:", JSON.stringify(error, null, 2));
           // Fallback: buscar casos sem filtro de distância
           const cases = await fetchActiveCases();
           return formatCasesData(cases?.slice(0, 3));
         }
 
         console.log(`Controller: ${data?.length || 0} casos próximos encontrados`);
+        if (data && data.length > 0) {
+          console.log("Controller: Primeiro caso:", data[0].nome_desaparecido, "- Distância:", data[0].distance_meters, "metros");
+        }
         return formatCasesData(data);
       } catch (rpcError) {
         console.error("Controller: Erro na chamada RPC:", rpcError);
+        console.error("Controller: Stack trace:", rpcError.stack);
         // Fallback para casos recentes
         const cases = await fetchActiveCases();
         return formatCasesData(cases?.slice(0, 3));

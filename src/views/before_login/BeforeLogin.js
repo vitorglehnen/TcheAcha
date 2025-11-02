@@ -20,22 +20,29 @@ const BeforeLogin = ({ navigation }) => {
 
   useEffect(() => {
     const fetchLocationAndCases = async () => {
+      setLoading(true);
+      
       // Obter localização
       console.log("BeforeLogin: Solicitando localização do usuário...");
-      const loc = await getLocation(); // Usa o getLocation do hook
+      const loc = await getLocation();
+      
+      let userLat = null;
+      let userLong = null;
+      
       if (loc) {
-        console.log("BeforeLogin: Localização obtida:", loc.coords);
-      } else if (locationError) {
-        console.log("BeforeLogin: Erro ao obter localização:", locationError);
+        userLat = loc.coords.latitude;
+        userLong = loc.coords.longitude;
+        console.log("BeforeLogin: Localização obtida:", { lat: userLat, long: userLong });
+      } else {
+        console.log("BeforeLogin: Não foi possível obter localização, buscando casos sem filtro de distância");
       }
 
-      // Buscar casos
-      setLoading(true);
+      // Buscar casos (com ou sem localização)
       try {
         console.log("BeforeLogin: Buscando casos públicos...");
-        const fetchedCases = await getActiveCasesForHome();
+        const fetchedCases = await getActiveCasesForHome(userLat, userLong);
         setCases(fetchedCases || []);
-        console.log("BeforeLogin: Casos públicos carregados.");
+        console.log("BeforeLogin: Casos públicos carregados:", fetchedCases?.length || 0);
       } catch (error) {
         console.error("BeforeLogin: Erro ao carregar casos:", error.message);
         Alert.alert("Erro", "Não foi possível carregar os casos no momento.");
