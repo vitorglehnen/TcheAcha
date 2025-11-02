@@ -25,17 +25,60 @@ const calculateDaysDifference = (date1, date2) => {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
+/** Formata os dados dos casos adicionando informações calculadas. */
+const formatCasesData = (cases) => {
+  if (!cases) return [];
+  return cases.map(caso => {
+    const disappearanceDate = new Date(caso.data_desaparecimento);
+    const today = new Date();
+    const diasDesaparecido = calculateDaysDifference(today, disappearanceDate);
+
+    return {
+      ...caso,
+      diasDesaparecido,
+      nome_usuario: caso.usuarios?.nome_completo || "Usuário Desconhecido",
+      foto_usuario: caso.usuarios?.foto_perfil_url || null,
+    };
+  });
+};
+
 /** Obtém a lista de casos ativos processados para a HomeScreen. */
-export const getActiveCasesForHome = async () => {
+export const getActiveCasesForHome = async (userLatitude = null, userLongitude = null) => {
   try {
+    console.log("Controller: Buscando casos ativos para a tela inicial...");
+    
+    // Se tiver localização do usuário, busca os mais próximos
+    if (userLatitude !== null && userLongitude !== null) {
+      console.log(`Controller: Buscando casos próximos a: lat=${userLatitude}, long=${userLongitude}`);
+      
+      try {
+        const { data, error } = await supabase.rpc('get_nearby_cases', {
+          user_lat: userLatitude,
+          user_long: userLongitude
+        });
+
+        if (error) {
+          console.error("Controller: Erro ao buscar casos próximos:", error);
+          // Fallback: buscar casos sem filtro de distância
+          const cases = await fetchActiveCases();
+          return formatCasesData(cases?.slice(0, 3));
+        }
+
+        console.log(`Controller: ${data?.length || 0} casos próximos encontrados`);
+        return formatCasesData(data);
+      } catch (rpcError) {
+        console.error("Controller: Erro na chamada RPC:", rpcError);
+        // Fallback para casos recentes
+        const cases = await fetchActiveCases();
+        return formatCasesData(cases?.slice(0, 3));
+      }
+    }
+
+    // Se não tiver localização, retorna os mais recentes
+    console.log("Controller: Sem localização, buscando casos mais recentes");
     const cases = await fetchActiveCases();
-    if (!cases) return [];
-    const processedCases = cases.map(caso => {
-      const disappearanceDate = new Date(caso.data_desaparecimento);
-      const today = new Date();
-      return { ...caso, diasDesaparecido: calculateDaysDifference(today, disappearanceDate) };
-    });
-    return processedCases;
+    return formatCasesData(cases?.slice(0, 3));
+    
   } catch (error) {
     console.error("Controller: Erro ao obter casos para Home:", error.message);
     throw error;

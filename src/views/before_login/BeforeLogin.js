@@ -11,19 +11,30 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './BeforeLogin.styles';
 import { getActiveCasesForHome } from '../../controllers/caseController';
+import { useLocation } from '../../utils/locationHook';
 
 const BeforeLogin = ({ navigation }) => {
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { location, loading: locationLoading, error: locationError, getLocation } = useLocation();
 
-  // useEffect busca os dados reais ao montar a tela
   useEffect(() => {
-    const loadCases = async () => {
+    const fetchLocationAndCases = async () => {
+      // Obter localização
+      console.log("BeforeLogin: Solicitando localização do usuário...");
+      const loc = await getLocation(); // Usa o getLocation do hook
+      if (loc) {
+        console.log("BeforeLogin: Localização obtida:", loc.coords);
+      } else if (locationError) {
+        console.log("BeforeLogin: Erro ao obter localização:", locationError);
+      }
+
+      // Buscar casos
       setLoading(true);
       try {
         console.log("BeforeLogin: Buscando casos públicos...");
-        const fetchedCases = await getActiveCasesForHome(); // Usa o controller
-        setCases(fetchedCases || []); // Garante que seja um array
+        const fetchedCases = await getActiveCasesForHome();
+        setCases(fetchedCases || []);
         console.log("BeforeLogin: Casos públicos carregados.");
       } catch (error) {
         console.error("BeforeLogin: Erro ao carregar casos:", error.message);
@@ -34,7 +45,7 @@ const BeforeLogin = ({ navigation }) => {
       }
     };
 
-    loadCases();
+    fetchLocationAndCases();
   }, []); // Roda apenas uma vez
 
   const handleLogin = () => {
@@ -87,10 +98,8 @@ const BeforeLogin = ({ navigation }) => {
         showsVerticalScrollIndicator={false}
       >
         {loading ? (
-          // Mostra indicador de carregamento
-          <ActivityIndicator size="large" color={styles.title.color} style={{ marginTop: 50 }} />
+          <ActivityIndicator size="large" color="#03A9F4" style={{ marginTop: 50 }} />
         ) : cases.length > 0 ? (
-          // Mapeia os casos reais buscados
           cases.map((caso) => (
             <View key={caso.id} style={styles.cardContainer}>
               <View style={styles.cardHeader}>
@@ -100,14 +109,12 @@ const BeforeLogin = ({ navigation }) => {
               </View>
               <View style={styles.cardBody}>
                 <View style={styles.imagePlaceholder}>
-                  {/* TODO: Adicionar lógica para mostrar imagem real se existir */}
                   <Ionicons name="person" size={40} color="#ccc" />
                 </View>
                 <View style={styles.cardDetails}>
                   <Text style={styles.detailText}>
                     <Text style={styles.detailLabel}>Nome:</Text> {caso.nome_desaparecido}
                   </Text>
-                  {/* Nascimento não é selecionado no DAO, caso precise, adicione lá */}
                   <Text style={styles.detailText}>
                     <Text style={styles.detailLabel}>Desaparecimento:</Text> {new Date(caso.data_desaparecimento).toLocaleDateString('pt-BR')}
                   </Text>
@@ -116,7 +123,7 @@ const BeforeLogin = ({ navigation }) => {
                   </Text>
                   <TouchableOpacity
                     style={styles.auxilieButton}
-                    onPress={handleAuxiliePress} // Chama a função que pede login
+                    onPress={handleAuxiliePress}
                   >
                     <Text style={styles.auxilieButtonText}>AUXILIE</Text>
                   </TouchableOpacity>
@@ -125,8 +132,7 @@ const BeforeLogin = ({ navigation }) => {
             </View>
           ))
         ) : (
-          // Mensagem se não houver casos
-          <Text style={{ textAlign: 'center', marginTop: 50, color: styles.description.color }}>
+          <Text style={{ textAlign: 'center', marginTop: 50, color: '#666' }}>
             Nenhum caso ativo encontrado no momento.
           </Text>
         )}
