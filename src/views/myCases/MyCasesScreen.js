@@ -38,14 +38,14 @@ const MyCasesScreen = ({ navigation }) => {
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      // 1. Pega o ID do usuário logado
+      // Pega o ID do usuário logado
       const { profileId: pid } = await getCurrentUserStatusAndProfileId();
       if (!pid) {
         throw new Error("Usuário não encontrado.");
       }
       setProfileId(pid);
 
-      // 2. Busca os dados do dashboard (meus casos e avistamentos pendentes)
+      // Busca os dados do dashboard (meus casos e avistamentos pendentes)
       const { myCases, pendingSightings } = await getCasesDashboardData(pid);
       setMyCases(myCases);
       setPendingSightings(pendingSightings);
@@ -76,7 +76,7 @@ const MyCasesScreen = ({ navigation }) => {
     }
   };
 
-  // Rejeita um avistamento (RF0008)
+  // Rejeita um avistamento
   const handleReject = async (sightingId) => {
     try {
       await rejectSighting(sightingId);
@@ -131,13 +131,14 @@ const MyCasesScreen = ({ navigation }) => {
           <ActivityIndicator size="large" color={COLORS.primary} style={styles.loadingContainer} />
         ) : (
           <>
-            {/* Seção de Notificações / Avistamentos Pendentes (RF0008) */}
+            {/* Seção de Notificações / Avistamentos Pendentes */}
             <Text style={styles.sectionTitle}>Avistamentos Pendentes</Text>
             {pendingSightings.length > 0 ? (
               pendingSightings.map(sighting => (
                 <View key={sighting.id} style={styles.sightingCard}>
                   <Text style={styles.sightingCaseTitle}>
-                    Avistamento para o caso: <Text style={{fontWeight: 'bold'}}>{sighting.casos.nome_desaparecido}</Text>
+                    Avistamento para o caso: 
+                    <Text style={{fontWeight: 'bold'}}> {sighting.casos?.nome_desaparecido || 'Caso não encontrado'}</Text>
                   </Text>
                   <Text style={styles.sightingDesc}>{sighting.descricao}</Text>
                   {sighting.foto_url && (
@@ -159,7 +160,7 @@ const MyCasesScreen = ({ navigation }) => {
               <Text style={styles.emptyStateText}>Nenhum avistamento pendente de validação.</Text>
             )}
 
-            {/* Seção de Meus Casos (RF0009) */}
+            {/* Seção de Meus Casos */}
             <Text style={styles.sectionTitle}>Meus Casos Cadastrados</Text>
             {myCases.length > 0 ? (
               myCases.map(caso => (

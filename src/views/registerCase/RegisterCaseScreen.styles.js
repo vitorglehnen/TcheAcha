@@ -138,5 +138,24 @@ export default StyleSheet.create({
   },
   fabDisabled: {
     backgroundColor: "#ccc",
-  }
+  },
+  locationPickerButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    backgroundColor: '#f9f9f9',
+  },
+  locationPickerText: {
+    fontSize: 14,
+    color: '#222',
+  },
+  locationPickerTextPlaceholder: {
+    fontSize: 14,
+    color: '#999',
+  },
 });

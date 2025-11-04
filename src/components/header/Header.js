@@ -18,7 +18,7 @@ const Header = ({ title, description, onLeftPress, leftIcon, showLogo = true }) 
       {/* Linha superior com ícones e logo */}
       <View style={styles.headerTopRow}>
         <View style={styles.leftIconContainer}>
-          {leftIcon && (
+          {leftIcon !== '' && (
             <TouchableOpacity onPress={onLeftPress}>
               <Ionicons name={leftIcon} size={32} color="#1A233D" />
             </TouchableOpacity>

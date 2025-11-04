@@ -1,15 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Platform } from "react-native";
 import { supabase } from "../lib/supabase";
-import * as Linking from 'expo-linking'; 
 
 import BeforeLogin from "../views/before_login/BeforeLogin";
 import LoginScreen from "../views/login/LoginScreen";
 import HomeScreen from "../views/home/HomeScreen";
 import ProfileScreen from "../views/profile/profileScreen";
-//import MapScreen from "../views/map/MapScreen";
+import MapScreen from "../views/map/MapScreen";
 import SettingsScreen from "../views/settings/SettingsScreen";
 import RegisterCaseScreen from "../views/registerCase/RegisterCaseScreen";
 import ForgotPasswordScreen from "../views/forgotPassword/ForgotPasswordScreen";
@@ -81,7 +79,7 @@ export default function AppNavigator() {
             <Stack.Screen name="DocumentCapture" component={DocumentCaptureScreen} />
             <Stack.Screen name="SelfieCapture" component={SelfieCaptureScreen} />
             <Stack.Screen name="CaseDetail" component={CaseDetailScreen} />
-            {/*<Stack.Screen name="Map" component={MapScreen} />*/}
+            <Stack.Screen name="Map" component={MapScreen} />
             <Stack.Screen name="MyCases" component={MyCasesScreen} />
           </>
         ) : (
@@ -90,7 +88,7 @@ export default function AppNavigator() {
             <Stack.Screen name="BeforeLogin" component={BeforeLogin} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-            {/*<Stack.Screen name="Register" component={RegisterScreen} />*/}
+            <Stack.Screen name="Register" component={RegisterScreen} />
           </>
         )}
         {/* Tela acessível em ambos os estados para recuperação de senha */}
