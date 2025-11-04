@@ -203,15 +203,14 @@ export default function RegisterCaseScreen({ navigation }) {
         <TextInput style={[styles.input, styles.textArea]} value={description} onChangeText={setDescription} placeholder="Descreva o que aconteceu, roupas, etc." placeholderTextColor="#999" multiline numberOfLines={4} />
 
         <Text style={styles.label}>Coordenadas (Lat, Lon)*</Text>
-        <TouchableOpacity 
-          style={styles.locationPickerButton} 
-          onPress={() => navigation.navigate('MapPicker', { returnScreen: 'RegisterCase' })}
-        >
-          <Text style={location ? styles.locationPickerText : styles.locationPickerTextPlaceholder}>
-            {location || "Selecionar no mapa..."}
-          </Text>
-          <Ionicons name="map-outline" size={20} color={COLORS.primary} />
-        </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          value={location}
+          onChangeText={setLocation}
+          placeholder="Ex: -29.4645, -51.9688"
+          placeholderTextColor="#999"
+          keyboardType="numeric"
+        />
         
         <Text style={styles.label}>Endereço Formatado*</Text>
          <TextInput
