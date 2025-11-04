@@ -248,7 +248,7 @@ export default function RegisterCaseScreen({ navigation }) {
         {loading ? (
           <ActivityIndicator size="small" color={COLORS.white} />
         ) : (
-          <Ionicons name={isEditMode ? "save" : "add"} size={32} color="#fff" />
+          <Ionicons name="save" size={32} color="#fff" />
         )}
       </TouchableOpacity>
     </SafeAreaView>

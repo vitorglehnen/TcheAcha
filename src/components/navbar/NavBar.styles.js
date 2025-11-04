@@ -23,9 +23,9 @@ export const styles = StyleSheet.create({
     elevation: 5,
   },
   navButton: {
-    paddingHorizontal: 20, 
+    flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center',  
   },
   plusButton: {
     backgroundColor: COLORS.white,
