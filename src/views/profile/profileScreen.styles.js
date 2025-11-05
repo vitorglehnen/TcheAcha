@@ -1,29 +1,16 @@
 import { StyleSheet } from "react-native";
+import { COLORS } from '../../styles/globalStyles';
 
 export const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: "#03A9F4",
+        backgroundColor: COLORS.white, 
     },
     container: {
         flex: 1,
         backgroundColor: "#f0f2f5",
     },
-    header: {
-        backgroundColor: "#03A9F4",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingVertical: 15,
-        paddingHorizontal: 15,
-    },
-    headerTitle: {
-        color: "white",
-        fontSize: 24,
-        fontWeight: "bold",
-    },
     profileContent: {
-        flex: 1,
         backgroundColor: "white",
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
@@ -31,11 +18,11 @@ export const styles = StyleSheet.create({
         marginTop: -10,
         paddingTop: 70,
         alignItems: "center",
+        paddingBottom: 100,
     },
     avatarContainer: {
-        position: "absolute",
-        top: -50,
         alignSelf: "center",
+        paddingBottom: 20
     },
     avatar: {
         width: 100,
@@ -56,6 +43,19 @@ export const styles = StyleSheet.create({
         width: "100%",
         height: "100%",
         borderRadius: 50,
+    },
+    avatarEditButton: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        backgroundColor: COLORS.textPrimary,
+        borderRadius: 15,
+        padding: 6,
+        borderWidth: 2,
+        borderColor: COLORS.white,
+    },
+    avatarEditIcon: {
+        color: COLORS.white,
     },
     userInfo: {
         alignItems: "center",
@@ -78,11 +78,7 @@ export const styles = StyleSheet.create({
         fontSize: 16,
         color: "#6c757d",
         marginTop: 4,
-    },
-    casesContainer: {
-        alignItems: "center",
-        marginBottom: 25,
-    },
+    },    
     casesNumber: {
         fontSize: 24,
         fontWeight: "bold",
@@ -165,7 +161,6 @@ export const styles = StyleSheet.create({
         marginTop: 8,
         fontWeight: "500",
     },
-    // Estilos do Modal
     modalOverlay: {
         flex: 1,
         backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -179,10 +174,6 @@ export const styles = StyleSheet.create({
         width: "85%",
         maxWidth: 400,
         elevation: 5,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
     },
     modalHeader: {
         flexDirection: "row",

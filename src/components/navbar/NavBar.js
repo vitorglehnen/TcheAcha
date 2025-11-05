@@ -19,10 +19,12 @@ const NavBar = ({ onHomePress, onAddPress, onProfilePress, activeScreen }) => {
     );
   }
   if (onAddPress) {
-    visibleButtons.push(
-      <TouchableOpacity key="add" style={[styles.navButton, styles.plusButton]} onPress={onAddPress}>
-        <Ionicons name="add" size={32} style={styles.plusIcon} />
-      </TouchableOpacity>
+    visibleButtons.push(      
+      <View key="add" style={styles.navButton}>        
+        <TouchableOpacity style={styles.plusButton} onPress={onAddPress}>
+          <Ionicons name="add" size={32} style={styles.plusIcon} />
+        </TouchableOpacity>
+      </View>
     );
   }
   if (onProfilePress) {

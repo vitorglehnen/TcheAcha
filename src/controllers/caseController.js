@@ -273,7 +273,7 @@ export const uploadCaseMedia = async (imageBase64, autorId) => {
     const arrayBuffer = decode(imageBase64);
 
     const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('casos') // Bucket de storage para mídias de casos
+      .from('casos')
       .upload(fileName, arrayBuffer, {
         contentType: 'image/jpeg',
         upsert: false,
@@ -315,7 +315,7 @@ export const saveCase = async (formData, existingCase, userProfile) => {
     }
   }
 
-  let locationString = 'POINT(0 0)'; // Ponto padrão caso a formatação falhe
+  let locationString = 'POINT(0 0)';
   const parts = formData.location.split(',');
   if (parts.length === 2) {
       const lat = parts[0].trim();

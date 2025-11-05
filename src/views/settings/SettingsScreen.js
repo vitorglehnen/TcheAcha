@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import styles from "./styles";
+import styles from "./SettingsScreen.styles";
 import NavBar from "../../components/navbar/NavBar";
 import Header from "../../components/header/Header";
 import Menu from "../../components/menu/Menu";
