@@ -34,7 +34,10 @@ const HomeScreen = ({ navigation }) => {
         console.log("HomeScreen: Casos carregados no estado.");
       } catch (error) {
         console.error("HomeScreen: Erro ao carregar casos:", error.message);
-        Alert.alert("Erro", "Não foi possível carregar os casos. Tente novamente mais tarde.");
+        Alert.alert(
+          "Erro",
+          "Não foi possível carregar os casos. Tente novamente mais tarde."
+        );
         setCases([]); // Limpa os casos em caso de erro
       } finally {
         setLoading(false);
@@ -48,25 +51,43 @@ const HomeScreen = ({ navigation }) => {
   const handleMapPress = () => navigation?.navigate("Map");
 
   const handleDetailsPress = async (caso) => {
-    // Sua lógica de verificação continua a mesma...
-    const { data: { user: authUser } } = await supabase.auth.getUser();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
     if (!authUser) {
+      // Se não estiver logado (embora não deva acontecer nesta tela), mostra modal
       setShowVerifyModal(true);
       return;
     }
+
+    // Busca o status do usuário no banco
     const { data, error } = await supabase
       .from("usuarios")
       .select("status_verificacao")
       .eq("auth_user_id", authUser.id)
       .single();
-    const statusesQueMostramModal = ["NAO_VERIFICADO", "REJEITADO"];
-    if (error || !data || statusesQueMostramModal.includes(data.status_verificacao)) {
+
+    if (error || !data) {
+      // Se der erro ou não achar o perfil, mostra modal de verificação por precaução
       setShowVerifyModal(true);
       return;
     }
-    if (data.status_verificacao === "APROVADO") {
-      // Passando o objeto caso inteiro para a tela de detalhes
+
+    // Lógica de verificação refinada
+    const status = data.status_verificacao;
+
+    if (status === "APROVADO") {
+      // 1. APROVADO: Navega para os detalhes
       navigation?.navigate("CaseDetail", { caso });
+    } else if (status === "PENDENTE") {
+      // 2. PENDENTE: Mostra alerta informativo
+      Alert.alert(
+        "Análise Pendente",
+        "Seu perfil ainda está sendo analisado. Você será notificado quando for aprovado."
+      );
+    } else {
+      // 3. NAO_VERIFICADO ou REJEITADO: Mostra modal para iniciar verificação
+      setShowVerifyModal(true);
     }
   };
 
@@ -81,7 +102,11 @@ const HomeScreen = ({ navigation }) => {
       />
 
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <TouchableOpacity style={styles.mapButton} onPress={handleMapPress} activeOpacity={0.8}>
+        <TouchableOpacity
+          style={styles.mapButton}
+          onPress={handleMapPress}
+          activeOpacity={0.8}
+        >
           <View style={styles.mapButtonContent}>
             <Ionicons name="map-outline" size={24} color="#1A233D" />
             <Text style={styles.mapButtonTitle}>
@@ -98,68 +123,90 @@ const HomeScreen = ({ navigation }) => {
 
         {/* Indicador de Carregamento */}
         {loading ? (
-          <ActivityIndicator size="large" color={styles.title.color} style={{ marginTop: 50 }} />
-        ) : (
-          // Lista de Casos (renderiza somente se não estiver carregando)
-          cases.length > 0 ? (
-            cases.map((caso) => (
-              <View key={caso.id} style={styles.cardContainer}>
-                <View style={styles.cardHeader}>
-                  <Text style={styles.cardHeaderText}>
-                    {/* Usando o campo calculado 'diasDesaparecido' */}
-                    Desaparecido(a) há {caso.diasDesaparecido} dias
-                  </Text>
+          <ActivityIndicator
+            size="large"
+            color={styles.title.color}
+            style={{ marginTop: 50 }}
+          />
+        ) : // Lista de Casos (renderiza somente se não estiver carregando)
+        cases.length > 0 ? (
+          cases.map((caso) => (
+            <View key={caso.id} style={styles.cardContainer}>
+              <View style={styles.cardHeader}>
+                <Text style={styles.cardHeaderText}>
+                  {/* Usando o campo calculado 'diasDesaparecido' */}
+                  Desaparecido(a) há {caso.diasDesaparecido} dias
+                </Text>
+              </View>
+              <View style={styles.cardBody}>
+                <View style={styles.imagePlaceholder}>
+                  {/* TODO: Usar a primeira imagem de caso.midias_urls se existir */}
+                  <Ionicons name="person" size={40} color="#ccc" />
                 </View>
-                <View style={styles.cardBody}>
-                  <View style={styles.imagePlaceholder}>
-                    {/* TODO: Usar a primeira imagem de caso.midias_urls se existir */}
-                    <Ionicons name="person" size={40} color="#ccc" />
-                  </View>
-                  <View style={styles.cardDetails}>
-                    <Text style={styles.detailText}>
-                      <Text style={styles.detailLabel}>Nome:</Text>{" "}
-                      {caso.nome_desaparecido}
+                <View style={styles.cardDetails}>
+                  <Text style={styles.detailText}>
+                    <Text style={styles.detailLabel}>Nome:</Text>{" "}
+                    {caso.nome_desaparecido}
+                  </Text>
+                  {/* Nota: data_nascimento não foi selecionada no DAO, remover ou adicionar lá */}
+                  <Text style={styles.detailText}>
+                    <Text style={styles.detailLabel}>Desaparecimento:</Text>{" "}
+                    {new Date(caso.data_desaparecimento).toLocaleDateString(
+                      "pt-BR"
+                    )}
+                  </Text>
+                  <Text style={styles.detailText}>
+                    <Text style={styles.detailLabel}>Localidade:</Text>{" "}
+                    {caso.endereco_desaparecimento_formatado}
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.detailsButton}
+                    onPress={() => handleDetailsPress(caso)}
+                  >
+                    <Text style={styles.detailsButtonText}>
+                      Detalhes do Caso
                     </Text>
-                    {/* Nota: data_nascimento não foi selecionada no DAO, remover ou adicionar lá */}
-                    <Text style={styles.detailText}>
-                      <Text style={styles.detailLabel}>Desaparecimento:</Text>{" "}
-                      {new Date(caso.data_desaparecimento).toLocaleDateString("pt-BR")}
-                    </Text>
-                    <Text style={styles.detailText}>
-                      <Text style={styles.detailLabel}>Localidade:</Text>{" "}
-                      {caso.endereco_desaparecimento_formatado}
-                    </Text>
-                    <TouchableOpacity
-                      style={styles.detailsButton}
-                      onPress={() => handleDetailsPress(caso)}
-                    >
-                      <Text style={styles.detailsButtonText}>Detalhes do Caso</Text>
-                    </TouchableOpacity>
-                  </View>
+                  </TouchableOpacity>
                 </View>
               </View>
-            ))
-          ) : (
-             // Mensagem se não houver casos e não estiver carregando
-            <Text style={{ textAlign: 'center', marginTop: 50, color: styles.description.color }}>
-              Nenhum caso ativo encontrado no momento.
-            </Text>
-          )
+            </View>
+          ))
+        ) : (
+          // Mensagem se não houver casos e não estiver carregando
+          <Text
+            style={{
+              textAlign: "center",
+              marginTop: 50,
+              color: styles.description.color,
+            }}
+          >
+            Nenhum caso ativo encontrado no momento.
+          </Text>
         )}
       </ScrollView>
 
       {/* Na Home, não mostramos o botão Home na NavBar */}
       <NavBar
-          activeScreen="Home"
-          onAddPress={handleAddPress}
-          // onProfilePress não precisa ser passado aqui se for acessível pelo menu
+        activeScreen="Home"
+        onAddPress={handleAddPress}
+        // onProfilePress não precisa ser passado aqui se for acessível pelo menu
       />
 
-
-      {isMenuVisible && ( <Menu visible={isMenuVisible} onClose={() => setMenuVisible(false)} navigation={navigation} /> )}
+      {isMenuVisible && (
+        <Menu
+          visible={isMenuVisible}
+          onClose={() => setMenuVisible(false)}
+          navigation={navigation}
+        />
+      )}
 
       {/* Modal de Verificação */}
-      <Modal visible={showVerifyModal} animationType="fade" transparent onRequestClose={() => setShowVerifyModal(false)}>
+      <Modal
+        visible={showVerifyModal}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setShowVerifyModal(false)}
+      >
         <View style={modalStyles.backdrop}>
           <View style={modalStyles.container}>
             <View style={modalStyles.header}>
@@ -173,7 +220,10 @@ const HomeScreen = ({ navigation }) => {
               verificado. É necessário enviar alguns documentos para a análise.
             </Text>
             <View style={modalStyles.row}>
-              <Pressable style={[modalStyles.button, modalStyles.secondary]} onPress={() => setShowVerifyModal(false)}>
+              <Pressable
+                style={[modalStyles.button, modalStyles.secondary]}
+                onPress={() => setShowVerifyModal(false)}
+              >
                 <Text style={modalStyles.secondaryText}>AGORA NÃO</Text>
               </Pressable>
               <Pressable

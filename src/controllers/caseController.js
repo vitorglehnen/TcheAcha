@@ -14,10 +14,10 @@ import {
   updateSightingStatus,
   updateCaseStatus,
   createCase,
-  updateCase 
-} from '../models/dao/CaseDao';
-import { supabase } from '../lib/supabase';
-import { decode } from 'base64-arraybuffer';
+  updateCase,
+} from "../models/dao/CaseDao";
+import { supabase } from "../lib/supabase";
+import { decode } from "base64-arraybuffer";
 
 /** Calcula a diferença em dias entre duas datas. */
 const calculateDaysDifference = (date1, date2) => {
@@ -28,7 +28,7 @@ const calculateDaysDifference = (date1, date2) => {
 /** Formata os dados dos casos adicionando informações calculadas. */
 const formatCasesData = (cases) => {
   if (!cases) return [];
-  return cases.map(caso => {
+  return cases.map((caso) => {
     const disappearanceDate = new Date(caso.data_desaparecimento);
     const today = new Date();
     const diasDesaparecido = calculateDaysDifference(today, disappearanceDate);
@@ -43,32 +43,51 @@ const formatCasesData = (cases) => {
 };
 
 /** Obtém a lista de casos ativos processados para a HomeScreen. */
-export const getActiveCasesForHome = async (userLatitude = null, userLongitude = null) => {
+export const getActiveCasesForHome = async (
+  userLatitude = null,
+  userLongitude = null
+) => {
   try {
     console.log("Controller: Buscando casos ativos para a tela inicial...");
-    console.log("Controller: Parâmetros recebidos:", { userLatitude, userLongitude });
-    
+    console.log("Controller: Parâmetros recebidos:", {
+      userLatitude,
+      userLongitude,
+    });
+
     // Se tiver localização do usuário, busca os mais próximos
     if (userLatitude !== null && userLongitude !== null) {
-      console.log(`Controller: Buscando casos próximos a: lat=${userLatitude}, long=${userLongitude}`);
-      
+      console.log(
+        `Controller: Buscando casos próximos a: lat=${userLatitude}, long=${userLongitude}`
+      );
+
       try {
-        const { data, error } = await supabase.rpc('get_nearby_cases', {
+        const { data, error } = await supabase.rpc("get_nearby_cases", {
           lat: userLatitude,
-          long: userLongitude
+          long: userLongitude,
         });
 
         if (error) {
           console.error("Controller: Erro ao buscar casos próximos:", error);
-          console.error("Controller: Detalhes do erro:", JSON.stringify(error, null, 2));
+          console.error(
+            "Controller: Detalhes do erro:",
+            JSON.stringify(error, null, 2)
+          );
           // Fallback: buscar casos sem filtro de distância
           const cases = await fetchActiveCases();
           return formatCasesData(cases?.slice(0, 3));
         }
 
-        console.log(`Controller: ${data?.length || 0} casos próximos encontrados`);
+        console.log(
+          `Controller: ${data?.length || 0} casos próximos encontrados`
+        );
         if (data && data.length > 0) {
-          console.log("Controller: Primeiro caso:", data[0].nome_desaparecido, "- Distância:", data[0].distance_meters, "metros");
+          console.log(
+            "Controller: Primeiro caso:",
+            data[0].nome_desaparecido,
+            "- Distância:",
+            data[0].distance_meters,
+            "metros"
+          );
         }
         return formatCasesData(data);
       } catch (rpcError) {
@@ -84,7 +103,6 @@ export const getActiveCasesForHome = async (userLatitude = null, userLongitude =
     console.log("Controller: Sem localização, buscando casos mais recentes");
     const cases = await fetchActiveCases();
     return formatCasesData(cases?.slice(0, 3));
-    
   } catch (error) {
     console.error("Controller: Erro ao obter casos para Home:", error.message);
     throw error;
@@ -95,38 +113,68 @@ export const getActiveCasesForHome = async (userLatitude = null, userLongitude =
 export const getCurrentUserStatusAndProfileId = async () => {
   try {
     const profile = await fetchCurrentUserProfile();
-    if (!profile) { return { isVerified: false, profileId: null }; }
-    return { isVerified: profile.status_verificacao === 'APROVADO', profileId: profile.id };
+    if (!profile) {
+      // Retorna o status padrão se o perfil não for encontrado
+      return { isVerified: false, profileId: null, status: "NAO_VERIFICADO" };
+    }
+    // Retorna o status real junto com os outros dados
+    return {
+      isVerified: profile.status_verificacao === "APROVADO",
+      profileId: profile.id,
+      status: profile.status_verificacao,
+    };
   } catch (error) {
-    console.error("Controller: Erro ao buscar status do usuário:", error.message);
+    console.error(
+      "Controller: Erro ao buscar status do usuário:",
+      error.message
+    );
     throw error;
   }
 };
 
 /** Obtém os detalhes completos de um caso. */
 export const getCaseDetails = async (caseId, usuarioId) => {
-  console.log(`Controller: Solicitando detalhes para o caso ID: ${caseId}, Usuário ID: ${usuarioId}`);
+  console.log(
+    `Controller: Solicitando detalhes para o caso ID: ${caseId}, Usuário ID: ${usuarioId}`
+  );
   try {
     const [caseDetails, sightings, comments] = await Promise.all([
       fetchCaseDetailsById(caseId),
       fetchSightingsByCaseId(caseId, usuarioId),
-      fetchCommentsByCaseId(caseId)
+      fetchCommentsByCaseId(caseId),
     ]);
     let processedCaseDetails = caseDetails;
     if (caseDetails) {
-        processedCaseDetails = { ...caseDetails, diasDesaparecido: calculateDaysDifference(new Date(), new Date(caseDetails.data_desaparecimento)) };
+      processedCaseDetails = {
+        ...caseDetails,
+        diasDesaparecido: calculateDaysDifference(
+          new Date(),
+          new Date(caseDetails.data_desaparecimento)
+        ),
+      };
     }
-    return { caseDetails: processedCaseDetails, sightings: sightings || [], comments: comments || [] };
+    return {
+      caseDetails: processedCaseDetails,
+      sightings: sightings || [],
+      comments: comments || [],
+    };
   } catch (error) {
-    console.error(`Controller: Erro ao obter detalhes do caso ${caseId}:`, error.message);
+    console.error(
+      `Controller: Erro ao obter detalhes do caso ${caseId}:`,
+      error.message
+    );
     throw error;
   }
 };
 
 /** Cria um novo comentário. */
 export const createComment = async (caseId, autorId, conteudo) => {
-  if (!conteudo || conteudo.trim() === '') { throw new Error('O comentário não pode estar vazio.'); }
-  if (!caseId || !autorId) { throw new Error('Dados insuficientes para criar comentário.'); }
+  if (!conteudo || conteudo.trim() === "") {
+    throw new Error("O comentário não pode estar vazio.");
+  }
+  if (!caseId || !autorId) {
+    throw new Error("Dados insuficientes para criar comentário.");
+  }
   try {
     return await addComment(caseId, autorId, conteudo);
   } catch (error) {
@@ -137,23 +185,42 @@ export const createComment = async (caseId, autorId, conteudo) => {
 
 /** Cria um novo avistamento. */
 export const createSighting = async (sightingData) => {
-  const { caseId, usuarioId, descricao, imageBase64, location, dataAvistamento } = sightingData;
+  const {
+    caseId,
+    usuarioId,
+    descricao,
+    imageBase64,
+    location,
+    dataAvistamento,
+  } = sightingData;
   if (!caseId || !usuarioId || !descricao || !location || !dataAvistamento) {
-    throw new Error('Dados insuficientes. Localização, data e descrição são obrigatórios.');
+    throw new Error(
+      "Dados insuficientes. Localização, data e descrição são obrigatórios."
+    );
   }
 
   let fotoUrl = null;
   if (imageBase64) {
     try {
-      const fileExt = 'jpg';
+      const fileExt = "jpg";
       const fileName = `${usuarioId}/${caseId}_${Date.now()}.${fileExt}`;
       const arrayBuffer = decode(imageBase64);
-      const { data: uploadData, error: uploadError } = await supabase.storage.from('avistamentos').upload(fileName, arrayBuffer, { contentType: 'image/jpeg', upsert: false });
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("avistamentos")
+        .upload(fileName, arrayBuffer, {
+          contentType: "image/jpeg",
+          upsert: false,
+        });
       if (uploadError) throw uploadError;
-      const { data: publicUrlData } = supabase.storage.from('avistamentos').getPublicUrl(uploadData.path);
+      const { data: publicUrlData } = supabase.storage
+        .from("avistamentos")
+        .getPublicUrl(uploadData.path);
       fotoUrl = publicUrlData.publicUrl;
     } catch (uploadError) {
-      console.error("Controller: Erro no upload da imagem:", uploadError.message);
+      console.error(
+        "Controller: Erro no upload da imagem:",
+        uploadError.message
+      );
       throw new Error(`Erro ao fazer upload da foto: ${uploadError.message}`);
     }
   }
@@ -161,24 +228,39 @@ export const createSighting = async (sightingData) => {
   const locationString = `POINT(${location.longitude} ${location.latitude})`;
 
   try {
-    return await addSighting({ caseId, usuarioId, descricao, fotoUrl, dataAvistamento, locationString });
+    return await addSighting({
+      caseId,
+      usuarioId,
+      descricao,
+      fotoUrl,
+      dataAvistamento,
+      locationString,
+    });
   } catch (dbError) {
-    console.error("Controller: Erro ao salvar avistamento no BD:", dbError.message);
+    console.error(
+      "Controller: Erro ao salvar avistamento no BD:",
+      dbError.message
+    );
     throw dbError;
   }
 };
 
 /** Cria uma nova denúncia. */
-export const reportContent = async (tipo, idConteudo, motivo, denuncianteId) => {
+export const reportContent = async (
+  tipo,
+  idConteudo,
+  motivo,
+  denuncianteId
+) => {
   if (!tipo || !idConteudo || !motivo || !denuncianteId) {
-    throw new Error('Dados insuficientes para criar denúncia.');
+    throw new Error("Dados insuficientes para criar denúncia.");
   }
   try {
     return await addReport({
       denunciante_id: denuncianteId,
       tipo_conteudo: tipo,
       id_conteudo: idConteudo,
-      motivo: motivo
+      motivo: motivo,
     });
   } catch (error) {
     console.error("Controller: Erro ao criar denúncia:", error.message);
@@ -212,11 +294,14 @@ export const getCasesDashboardData = async (autorId) => {
   try {
     const [myCases, pendingSightings] = await Promise.all([
       fetchCasesByAutorId(autorId),
-      fetchPendingSightingsForAutor(autorId)
+      fetchPendingSightingsForAutor(autorId),
     ]);
     return { myCases: myCases || [], pendingSightings: pendingSightings || [] };
   } catch (error) {
-    console.error("Controller: Erro ao buscar dados do dashboard:", error.message);
+    console.error(
+      "Controller: Erro ao buscar dados do dashboard:",
+      error.message
+    );
     throw error;
   }
 };
@@ -224,7 +309,7 @@ export const getCasesDashboardData = async (autorId) => {
 /** Aprova um avistamento pendente. */
 export const approveSighting = async (sightingId) => {
   try {
-    return await updateSightingStatus(sightingId, 'VALIDADO');
+    return await updateSightingStatus(sightingId, "VALIDADO");
   } catch (error) {
     console.error("Controller: Erro ao aprovar avistamento:", error.message);
     throw error;
@@ -234,7 +319,7 @@ export const approveSighting = async (sightingId) => {
 /** Rejeita um avistamento pendente. */
 export const rejectSighting = async (sightingId) => {
   try {
-    return await updateSightingStatus(sightingId, 'REJEITADO');
+    return await updateSightingStatus(sightingId, "REJEITADO");
   } catch (error) {
     console.error("Controller: Erro ao rejeitar avistamento:", error.message);
     throw error;
@@ -244,9 +329,12 @@ export const rejectSighting = async (sightingId) => {
 /** Marca um caso como ENCONTRADO. */
 export const markCaseAsFound = async (caseId) => {
   try {
-    return await updateCaseStatus(caseId, 'ENCONTRADO');
+    return await updateCaseStatus(caseId, "ENCONTRADO");
   } catch (error) {
-    console.error("Controller: Erro ao marcar caso como encontrado:", error.message);
+    console.error(
+      "Controller: Erro ao marcar caso como encontrado:",
+      error.message
+    );
     throw error;
   }
 };
@@ -254,7 +342,7 @@ export const markCaseAsFound = async (caseId) => {
 /** Cancela (reabre) um caso. */
 export const markCaseAsActive = async (caseId) => {
   try {
-    return await updateCaseStatus(caseId, 'ATIVO');
+    return await updateCaseStatus(caseId, "ATIVO");
   } catch (error) {
     console.error("Controller: Erro ao reabrir caso:", error.message);
     throw error;
@@ -268,28 +356,33 @@ export const uploadCaseMedia = async (imageBase64, autorId) => {
     throw new Error("Imagem ou ID do autor inválido para upload.");
   }
   try {
-    const fileExt = 'jpg';
+    const fileExt = "jpg";
     const fileName = `public/${autorId}/${Date.now()}.${fileExt}`;
     const arrayBuffer = decode(imageBase64);
 
     const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('casos')
+      .from("casos")
       .upload(fileName, arrayBuffer, {
-        contentType: 'image/jpeg',
+        contentType: "image/jpeg",
         upsert: false,
       });
 
     if (uploadError) throw uploadError;
 
     const { data: publicUrlData } = supabase.storage
-      .from('casos')
+      .from("casos")
       .getPublicUrl(uploadData.path);
-    
-    console.log("Controller: Upload de mídia concluído:", publicUrlData.publicUrl);
-    return publicUrlData.publicUrl;
 
+    console.log(
+      "Controller: Upload de mídia concluído:",
+      publicUrlData.publicUrl
+    );
+    return publicUrlData.publicUrl;
   } catch (error) {
-    console.error("Controller: Erro no upload da mídia do caso:", error.message);
+    console.error(
+      "Controller: Erro no upload da mídia do caso:",
+      error.message
+    );
     throw new Error(`Erro ao fazer upload da mídia: ${error.message}`);
   }
 };
@@ -299,8 +392,17 @@ export const saveCase = async (formData, existingCase, userProfile) => {
   console.log("Controller: Salvando caso...");
   const { profileId, isVerified } = userProfile;
 
-  if (!isVerified) { throw new Error("Usuário não verificado."); }
-  if (!formData.title || !formData.name || !formData.description || !formData.contact || !formData.location || !formData.date) {
+  if (!isVerified) {
+    throw new Error("Usuário não verificado.");
+  }
+  if (
+    !formData.title ||
+    !formData.name ||
+    !formData.description ||
+    !formData.contact ||
+    !formData.location ||
+    !formData.date
+  ) {
     throw new Error("Por favor, preencha todos os campos obrigatórios.");
   }
 
@@ -308,21 +410,26 @@ export const saveCase = async (formData, existingCase, userProfile) => {
 
   if (formData.imageBase64) {
     try {
-      const newImageUrl = await uploadCaseMedia(formData.imageBase64, profileId);
+      const newImageUrl = await uploadCaseMedia(
+        formData.imageBase64,
+        profileId
+      );
       mediaUrls = [newImageUrl];
     } catch (error) {
       throw error;
     }
   }
 
-  let locationString = 'POINT(0 0)';
-  const parts = formData.location.split(',');
+  let locationString = "POINT(0 0)";
+  const parts = formData.location.split(",");
   if (parts.length === 2) {
-      const lat = parts[0].trim();
-      const lon = parts[1].trim();
-      locationString = `POINT(${lon} ${lat})`;
+    const lat = parts[0].trim();
+    const lon = parts[1].trim();
+    locationString = `POINT(${lon} ${lat})`;
   } else {
-      console.warn(`Formato de localização inválido: "${formData.location}". Usando POINT(0 0).`);
+    console.warn(
+      `Formato de localização inválido: "${formData.location}". Usando POINT(0 0).`
+    );
   }
 
   const caseData = {
