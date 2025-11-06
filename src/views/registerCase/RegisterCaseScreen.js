@@ -76,36 +76,37 @@ export default function RegisterCaseScreen({ navigation }) {
         const profile = await getCurrentUserStatusAndProfileId();
         setUserProfile(profile); // Salva o perfil (incluindo isVerified, profileId, status)
 
+        // 1. APROVADO: Permite que o usuário continue na tela.
         if (profile.isVerified) {
-          // 1. APROVADO: Permite continuar
           return;
         }
 
+        // 2. PENDENTE: Avisa que está em análise e volta para a tela anterior.
         if (profile.status === "PENDENTE") {
-          // 2. PENDENTE: Mostra alerta e volta
           Alert.alert(
             "Análise Pendente",
             "Seu perfil ainda está sendo analisado. Você não pode cadastrar casos no momento.",
             [{ text: "OK", onPress: () => navigation.goBack() }]
           );
-        } else {
-          // 3. NAO_VERIFICADO ou REJEITADO: Mostra alerta e direciona para verificação
-          Alert.alert(
-            "Verificação Necessária",
-            "Você precisa ser um usuário verificado para criar ou editar um caso.",
-            [
-              {
-                text: "Cancelar",
-                onPress: () => navigation.goBack(),
-                style: "cancel",
-              },
-              {
-                text: "Verificar Agora",
-                onPress: () => navigation.navigate("VerifyIdentity"),
-              },
-            ]
-          );
+          return; // Impede a execução do código abaixo
         }
+
+        // 3. NAO_VERIFICADO ou REJEITADO: Dá a opção de ir para a verificação.
+        Alert.alert(
+          "Verificação Necessária",
+          "Você precisa ser um usuário verificado para criar ou editar um caso.",
+          [
+            {
+              text: "Cancelar",
+              onPress: () => navigation.goBack(),
+              style: "cancel",
+            },
+            {
+              text: "Verificar Agora",
+              onPress: () => navigation.navigate("VerifyIdentity"),
+            },
+          ]
+        );
       } catch (error) {
         Alert.alert(
           "Erro",
