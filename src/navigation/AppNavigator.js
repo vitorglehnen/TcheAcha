@@ -13,7 +13,7 @@ import RegisterScreen from "../views/register/RegisterScreen";
 import ForgotPasswordScreen from "../views/forgotPassword/ForgotPasswordScreen";
 import ResetPasswordScreen from "../views/resetPassword/ResetPasswordScreen";
 
-// Telas Logadas (que NÃO TÊM a navbar)
+// Telas Logadas (que NÃO tem a navbar)
 import SettingsScreen from "../views/settings/SettingsScreen";
 import RegisterCaseScreen from "../views/registerCase/RegisterCaseScreen";
 import VerifyIdentityScreen from "../views/verification/VerifyIdentityScreen";
