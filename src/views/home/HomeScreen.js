@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { styles, modalStyles } from "./HomeScreen.styles";
-import NavBar from "../../components/navbar/NavBar";
 import Menu from "../../components/menu/Menu";
 import { supabase } from "../../lib/supabase";
 import Header from "../../components/header/Header";
@@ -184,13 +183,6 @@ const HomeScreen = ({ navigation }) => {
           </Text>
         )}
       </ScrollView>
-
-      {/* Na Home, não mostramos o botão Home na NavBar */}
-      <NavBar
-        activeScreen="Home"
-        onAddPress={handleAddPress}
-        // onProfilePress não precisa ser passado aqui se for acessível pelo menu
-      />
 
       {isMenuVisible && (
         <Menu

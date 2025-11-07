@@ -1,55 +1,57 @@
-import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { styles } from './NavBar.styles';
+import React from "react";
+import { View, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { styles } from "./NavBar.styles";
 
-const NavBar = ({ onHomePress, onAddPress, onProfilePress, activeScreen }) => {
-  // Cria um array com os componentes de botão que devem ser visíveis
-  const visibleButtons = [];
-
-  if (onHomePress) {
-    visibleButtons.push(
-      <TouchableOpacity key="home" style={styles.navButton} onPress={onHomePress}>
-        <Ionicons 
-          name={activeScreen === 'Home' ? "home" : "home-outline"} 
-          size={28} 
-          style={styles.icon} 
-        />
-      </TouchableOpacity>
-    );
-  }
-  if (onAddPress) {
-    visibleButtons.push(      
-      <View key="add" style={styles.navButton}>        
-        <TouchableOpacity style={styles.plusButton} onPress={onAddPress}>
-          <Ionicons name="add" size={32} style={styles.plusIcon} />
-        </TouchableOpacity>
-      </View>
-    );
-  }
-  if (onProfilePress) {
-    visibleButtons.push(
-      <TouchableOpacity key="profile" style={styles.navButton} onPress={onProfilePress}>
-        <Ionicons 
-          name={activeScreen === 'Profile' ? "person" : "person-outline"} 
-          size={28} 
-          style={styles.icon} 
-        />
-      </TouchableOpacity>
-    );
-  }
-
-  // Se não houver botões para mostrar, não renderiza nada
-  if (visibleButtons.length === 0) {
-    return null;
-  }
-
-  // Determina o estilo de alinhamento com base na quantidade de botões
-  const justifyContent = visibleButtons.length === 1 ? 'center' : 'space-around';
+// usa 'tabBar' do BottomTabNavigator. Ele recebe 'state' e 'navigation'.
+const NavBar = ({ state, navigation }) => {
+  const getIconName = (screenName, isActive) => {
+    if (screenName === "Home") {
+      return isActive ? "home" : "home-outline";
+    }
+    if (screenName === "MyCases") {
+      return isActive ? "briefcase" : "briefcase-outline";
+    }
+    if (screenName === "Profile") {
+      return isActive ? "person" : "person-outline";
+    }
+    return "ellipse-outline";
+  };
 
   return (
-    <View style={[styles.navBar, { justifyContent }]}>
-      {visibleButtons}
+    <View style={styles.navBar}>
+      {state.routes.map((route, index) => {
+        const isActive = state.index === index;
+
+        const onPress = () => {
+          const event = navigation.emit({
+            type: "tabPress",
+            target: route.key,
+            canPreventDefault: true,
+          });
+
+          if (!isActive && !event.defaultPrevented) {
+            navigation.navigate(route.name);
+          }
+        };
+
+        return (
+          <TouchableOpacity
+            key={route.key}
+            style={styles.navButton}
+            onPress={onPress}
+            accessibilityRole="button"
+            accessibilityState={isActive ? { selected: true } : {}}
+            accessibilityLabel={route.name}
+          >
+            <Ionicons
+              name={getIconName(route.name, isActive)}
+              size={28}
+              style={styles.icon}
+            />
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 };
