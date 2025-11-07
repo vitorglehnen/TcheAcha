@@ -98,6 +98,35 @@ export default StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
   },
+  filterBadge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#FF3B30",
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
+  // Loading Overlay
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 999,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: "#fff",
+    fontWeight: "600",
+  },
   // Card de Detalhes
   caseDetailsCard: {
     position: "absolute",

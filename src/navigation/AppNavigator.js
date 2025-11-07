@@ -93,6 +93,7 @@ export default function AppNavigator() {
         )}
         {/* Tela acessível em ambos os estados para recuperação de senha */}
         <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+        <Stack.Screen name="CaseDetails" component={CaseDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
