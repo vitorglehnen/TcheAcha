@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -6,41 +6,23 @@ import {
   Image,
   Modal,
   TextInput,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import styles from "./MapScreen.styles";
+import { useLocation } from "../../utils/locationHook";
+import { getUserData } from "../../controllers/authController";
+import { getActiveCasesForHome } from "../../controllers/caseController";
 
-// Mock data - casos no mapa
-const mockMapCases = [
-  {
-    id: 1,
-    nome: "Paulo César Tinga",
-    dataNascimento: "05/10/2004",
-    diasDesaparecido: 365,
-    latitude: -30.0346,
-    longitude: -51.2177,
-    foto: null,
-  },
-  {
-    id: 2,
-    nome: "Maria da Silva",
-    dataNascimento: "12/03/1998",
-    diasDesaparecido: 180,
-    latitude: -30.0277,
-    longitude: -51.2287,
-    foto: null,
-  },
-  {
-    id: 3,
-    nome: "João Santos",
-    dataNascimento: "20/07/2010",
-    diasDesaparecido: 45,
-    latitude: -30.0466,
-    longitude: -51.2096,
-    foto: null,
-  },
-];
+// Coordenadas padrão - Porto Alegre
+const DEFAULT_REGION = {
+  latitude: -30.0346,
+  longitude: -51.2177,
+  latitudeDelta: 0.0922,
+  longitudeDelta: 0.0421,
+};
 
 // Dark mode map style
 const darkMapStyle = [
@@ -134,6 +116,9 @@ const darkMapStyle = [
 ];
 
 export default function MapScreen({ navigation }) {
+  const mapRef = useRef(null);
+  const { location, getLocation } = useLocation();
+  
   const [selectedCase, setSelectedCase] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
@@ -144,6 +129,113 @@ export default function MapScreen({ navigation }) {
     tempoMin: "",
     tempoMax: "",
   });
+  
+  const [cases, setCases] = useState([]);
+  const [filteredCases, setFilteredCases] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState(null);
+  const [initialRegion, setInitialRegion] = useState(DEFAULT_REGION);
+
+  // Carrega localização do usuário e dados ao montar
+  useEffect(() => {
+    loadInitialData();
+  }, []);
+
+  const loadInitialData = async () => {
+    try {
+      setLoading(true);
+
+      // 1. Obter dados do usuário
+      const user = await getUserData();
+      setUserData(user);
+      console.log("MapScreen: Usuário carregado:", user?.nome_completo);
+
+      // 2. Obter localização
+      const loc = await getLocation();
+      if (loc) {
+        const userRegion = {
+          latitude: loc.coords.latitude,
+          longitude: loc.coords.longitude,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        };
+        setInitialRegion(userRegion);
+        console.log("MapScreen: Localização do usuário obtida");
+        
+        // Move o mapa para a localização do usuário
+        if (mapRef.current) {
+          mapRef.current.animateToRegion(userRegion, 1000);
+        }
+      } else {
+        console.log("MapScreen: Usando localização padrão (Porto Alegre)");
+      }
+
+      // 3. Buscar casos próximos
+      const fetchedCases = await getActiveCasesForHome(
+        loc?.coords.latitude,
+        loc?.coords.longitude,
+        100 // Buscar mais casos para o mapa
+      );
+      
+      // Converte os casos para o formato do mapa
+      const mappedCases = fetchedCases
+        .filter(caso => caso.localizacao_desaparecimento) // Apenas casos com localização
+        .map(caso => {
+          console.log("MapScreen: Processando caso:", caso.nome_desaparecido);
+          console.log("MapScreen: Localização raw:", caso.localizacao_desaparecimento);
+          
+          // Parse da localização Geography (formato: POINT(longitude latitude))
+          const locString = String(caso.localizacao_desaparecimento);
+          const match = locString.match(/POINT\(([^ ]+) ([^ ]+)\)/);
+          
+          if (!match) {
+            console.warn("MapScreen: Formato de localização inválido para caso:", caso.nome_desaparecido);
+            return null;
+          }
+          
+          const longitude = parseFloat(match[1]);
+          const latitude = parseFloat(match[2]);
+          
+          console.log("MapScreen: Coordenadas parseadas:", { latitude, longitude });
+          
+          if (isNaN(latitude) || isNaN(longitude)) {
+            console.warn("MapScreen: Coordenadas inválidas (NaN) para caso:", caso.nome_desaparecido);
+            return null;
+          }
+
+          // Pega a primeira foto do array midias_urls
+          const foto = caso.midias_urls && caso.midias_urls.length > 0 
+            ? caso.midias_urls[0] 
+            : null;
+
+          const mappedCase = {
+            id: caso.id,
+            nome: caso.nome_desaparecido,
+            tipo: caso.tipo || 'PESSOA',
+            dataNascimento: caso.data_desaparecimento,
+            diasDesaparecido: caso.diasDesaparecido,
+            latitude,
+            longitude,
+            foto,
+            caseData: caso, // Mantém dados completos para navegação
+          };
+          
+          console.log("MapScreen: Caso mapeado com sucesso:", mappedCase.nome);
+          return mappedCase;
+        })
+        .filter(Boolean); // Remove casos inválidos
+
+      console.log(`MapScreen: ${mappedCases.length} casos carregados no mapa`);
+      setCases(mappedCases);
+      setFilteredCases(mappedCases);
+
+    } catch (error) {
+      console.error("MapScreen: Erro ao carregar dados:", error);
+      Alert.alert("Erro", "Não foi possível carregar os casos no mapa.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCasePress = (caso) => {
     setSelectedCase(caso);
@@ -153,12 +245,81 @@ export default function MapScreen({ navigation }) {
     setSelectedCase(null);
   };
 
+  const handleViewDetails = () => {
+    if (!userData) {
+      Alert.alert(
+        "Login Necessário",
+        "Você precisa fazer login para ver os detalhes do caso.",
+        [
+          { text: "Cancelar", style: "cancel" },
+          { text: "Fazer Login", onPress: () => navigation.navigate("Login") },
+        ]
+      );
+      return;
+    }
+
+    if (userData.status_verificacao !== "APROVADO") {
+      Alert.alert(
+        "Verificação Necessária",
+        "Você precisa ter seus documentos validados para ver os detalhes dos casos.",
+        [
+          { text: "OK", style: "default" },
+        ]
+      );
+      return;
+    }
+
+    // Usuário está validado, navegar para detalhes
+    // Passa o objeto caso completo (caseData) em vez de apenas o ID
+    navigation.navigate("CaseDetails", { 
+      caso: {
+        id: selectedCase.id,
+        ...selectedCase.caseData
+      }
+    });
+    setSelectedCase(null);
+  };
+
   const toggleFilters = () => {
     setShowFilters(!showFilters);
   };
 
   const applyFilters = () => {
-    console.log("Filtros aplicados:", filters);
+    console.log("MapScreen: Aplicando filtros:", filters);
+    
+    let filtered = [...cases];
+
+    // Filtro por tipo
+    if (filters.tipoPessoa && !filters.tipoAnimal) {
+      filtered = filtered.filter(c => c.tipo === 'PESSOA');
+    } else if (filters.tipoAnimal && !filters.tipoPessoa) {
+      filtered = filtered.filter(c => c.tipo === 'ANIMAL');
+    }
+
+    // Filtro por idade (calculada a partir da data de nascimento)
+    if (filters.idadeMin || filters.idadeMax) {
+      const min = parseInt(filters.idadeMin) || 0;
+      const max = parseInt(filters.idadeMax) || 999;
+      
+      filtered = filtered.filter(c => {
+        const birthDate = new Date(c.dataNascimento);
+        const age = new Date().getFullYear() - birthDate.getFullYear();
+        return age >= min && age <= max;
+      });
+    }
+
+    // Filtro por tempo de desaparecimento
+    if (filters.tempoMin || filters.tempoMax) {
+      const min = parseInt(filters.tempoMin) || 0;
+      const max = parseInt(filters.tempoMax) || 99999;
+      
+      filtered = filtered.filter(c => {
+        return c.diasDesaparecido >= min && c.diasDesaparecido <= max;
+      });
+    }
+
+    console.log(`MapScreen: ${filtered.length} casos após filtros`);
+    setFilteredCases(filtered);
     setShowFilters(false);
   };
 
@@ -171,6 +332,7 @@ export default function MapScreen({ navigation }) {
       tempoMin: "",
       tempoMax: "",
     });
+    setFilteredCases(cases); // Restaura todos os casos
     setShowFilters(false);
   };
 
@@ -194,20 +356,24 @@ export default function MapScreen({ navigation }) {
         </View>
       </View>
 
+      {/* Loading Overlay */}
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#03A9F4" />
+          <Text style={styles.loadingText}>Carregando casos...</Text>
+        </View>
+      )}
+
       {/* Mapa com react-native-maps */}
       <MapView
+        ref={mapRef}
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         customMapStyle={darkMapStyle}
-        initialRegion={{
-          latitude: -30.0346,
-          longitude: -51.2177,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
+        initialRegion={initialRegion}
       >
         {/* Marcadores dos casos */}
-        {mockMapCases.map((caso) => (
+        {filteredCases.map((caso) => (
           <Marker
             key={caso.id}
             coordinate={{
@@ -221,7 +387,11 @@ export default function MapScreen({ navigation }) {
                 {caso.foto ? (
                   <Image source={{ uri: caso.foto }} style={styles.markerImage} />
                 ) : (
-                  <Ionicons name="person" size={24} color="#fff" />
+                  <Ionicons 
+                    name={caso.tipo === 'ANIMAL' ? 'paw' : 'person'} 
+                    size={24} 
+                    color="#fff" 
+                  />
                 )}
               </View>
               <View style={styles.markerPointer} />
@@ -233,6 +403,9 @@ export default function MapScreen({ navigation }) {
       {/* Botão de Filtro */}
       <TouchableOpacity style={styles.filterButton} onPress={toggleFilters}>
         <Ionicons name="filter" size={28} color="#fff" />
+        {(filters.tipoPessoa || filters.tipoAnimal || filters.idadeMin || filters.idadeMax || filters.tempoMin || filters.tempoMax) && (
+          <View style={styles.filterBadge} />
+        )}
       </TouchableOpacity>
 
       {/* Card de Detalhes do Caso Selecionado */}
@@ -245,14 +418,17 @@ export default function MapScreen({ navigation }) {
             </TouchableOpacity>
           </View>
           <Text style={styles.caseDetailsDate}>
-            Nascido em: {selectedCase.dataNascimento}
+            Desaparecimento: {new Date(selectedCase.dataNascimento).toLocaleDateString('pt-BR')}
           </Text>
           <View style={styles.caseDetailsBadge}>
             <Text style={styles.caseDetailsBadgeText}>
-              Desaparecido a {selectedCase.diasDesaparecido} dias
+              Desaparecido há {selectedCase.diasDesaparecido} dias
             </Text>
           </View>
-          <TouchableOpacity style={styles.caseDetailsButton}>
+          <TouchableOpacity 
+            style={styles.caseDetailsButton}
+            onPress={handleViewDetails}
+          >
             <Text style={styles.caseDetailsButtonText}>Ver mais detalhes</Text>
             <Ionicons name="chevron-forward" size={20} color="#fff" />
           </TouchableOpacity>
