@@ -77,7 +77,7 @@ export default function AppNavigator() {
             {/* Esta é a tela principal que contém as 3 tabs com a navbar */}
             <Stack.Screen name="MainApp" component={MainTabNavigator} />
 
-            {/* Estas telas são empilhadas SOBRE o tab navigator, escondendo a navbar */}
+            {/* Estas telas são empilhadas sobre o tab navigator, escondendo a navbar */}
             <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="RegisterCase" component={RegisterCaseScreen} />
             <Stack.Screen
