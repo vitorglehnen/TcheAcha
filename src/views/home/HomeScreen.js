@@ -15,36 +15,60 @@ import Menu from "../../components/menu/Menu";
 import { supabase } from "../../lib/supabase";
 import Header from "../../components/header/Header";
 import { getActiveCasesForHome } from "../../controllers/caseController";
+import { useLocation } from "../../utils/locationHook";
+import { useIsFocused } from "@react-navigation/native";
 
 const HomeScreen = ({ navigation }) => {
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isMenuVisible, setMenuVisible] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
+  
+  const { getLocation } = useLocation();
+  const isFocused = useIsFocused();
 
-  // useEffect agora busca os dados reais
+  // useEffect agora busca os dados reais com localização
   useEffect(() => {
     const loadCases = async () => {
-      setLoading(true); // Inicia o carregamento
+      setLoading(true);
+      
+      // Obter localização
+      console.log("HomeScreen: Solicitando localização do usuário...");
+      const loc = await getLocation();
+      
+      let userLat = null;
+      let userLong = null;
+      
+      if (loc) {
+        userLat = loc.coords.latitude;
+        userLong = loc.coords.longitude;
+        console.log("HomeScreen: Localização obtida:", { userLat, userLong });
+      } else {
+        console.log("HomeScreen: Não foi possível obter localização, buscando casos sem filtro de distância");
+      }
+
+      // Buscar casos
       try {
-        console.log("HomeScreen: Buscando casos...");
-        const fetchedCases = await getActiveCasesForHome(); // Chama o controller
-        setCases(fetchedCases || []); // Garante que cases seja um array
-        console.log("HomeScreen: Casos carregados no estado.");
+        console.log("HomeScreen: Buscando casos próximos...");
+        const fetchedCases = await getActiveCasesForHome(userLat, userLong, 10); // 10 casos para a home
+        setCases(fetchedCases || []);
+        console.log("HomeScreen: Casos carregados:", fetchedCases?.length || 0);
       } catch (error) {
         console.error("HomeScreen: Erro ao carregar casos:", error.message);
         Alert.alert(
           "Erro",
           "Não foi possível carregar os casos. Tente novamente mais tarde."
         );
-        setCases([]); // Limpa os casos em caso de erro
+        setCases([]);
       } finally {
         setLoading(false);
       }
     };
 
-    loadCases();
-  }, []); // Roda apenas uma vez quando o componente monta
+    if (isFocused) {
+      loadCases();
+    }
+  }, [isFocused]); // Recarrega quando a tela ganha foco
 
   const handleAddPress = () => navigation?.navigate("RegisterCase");
   const handleMapPress = () => navigation?.navigate("Map");
