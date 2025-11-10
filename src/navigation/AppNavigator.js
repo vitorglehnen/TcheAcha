@@ -21,6 +21,8 @@ import DocumentCaptureScreen from "../views/verification/DocumentCaptureScreen";
 import SelfieCaptureScreen from "../views/verification/SelfieCaptureScreen";
 import CaseDetailScreen from "../views/caseDetail/caseDetails";
 import MapScreen from "../views/map/MapScreen";
+import MapPickerScreen from "../views/mapPicker/MapPickerScreen";
+
 const Stack = createNativeStackNavigator();
 
 const linking = {
@@ -94,6 +96,7 @@ export default function AppNavigator() {
             />
             <Stack.Screen name="CaseDetail" component={CaseDetailScreen} />
             <Stack.Screen name="Map" component={MapScreen} />
+            <Stack.Screen name="MapPicker" component={MapPickerScreen} />
           </>
         ) : (
           <>
