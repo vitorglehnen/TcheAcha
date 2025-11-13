@@ -53,7 +53,7 @@ export default function ResetPasswordScreen({ navigation }) {
           'Sucesso',
           'Sua senha foi redefinida com sucesso! Você será redirecionado para a tela inicial.'
         );
-        navigation.navigate('Home');
+        navigation.navigate('MainApp', { screen: 'Home' });
       }
     } catch (err) {
       setLoading(false);

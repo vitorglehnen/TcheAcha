@@ -12,6 +12,7 @@ import LoginScreen from "../views/login/LoginScreen";
 import RegisterScreen from "../views/register/RegisterScreen";
 import ForgotPasswordScreen from "../views/forgotPassword/ForgotPasswordScreen";
 import ResetPasswordScreen from "../views/resetPassword/ResetPasswordScreen";
+import VerifyCodeScreen from "../views/verifyCode/VerifyCodeScreen"; // Importando a tela de código
 
 // Telas Logadas (que NÃO tem a navbar)
 import SettingsScreen from "../views/settings/SettingsScreen";
@@ -25,19 +26,9 @@ import MapPickerScreen from "../views/mapPicker/MapPickerScreen";
 
 const Stack = createNativeStackNavigator();
 
-const linking = {
-  prefixes: ["tcheacha://", "http://localhost:8081"],
-  config: {
-    screens: {
-      ResetPassword: "reset-password",
-    },
-  },
-};
-
 export default function AppNavigator() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigationRef = useRef(null);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -49,16 +40,9 @@ export default function AppNavigator() {
     };
     checkSession();
 
-    // Escuta mudanças no estado de autenticação
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
-        if (event === "PASSWORD_RECOVERY") {
-          console.log(
-            "PASSWORD_RECOVERY event detectado. Navegando para ResetPassword."
-          );
-          navigationRef.current?.navigate("ResetPassword");
-        }
       }
     );
 
@@ -72,14 +56,12 @@ export default function AppNavigator() {
   }
 
   return (
-    <NavigationContainer linking={linking} ref={navigationRef}>
+    <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {session ? (
           <>
-            {/* Esta é a tela principal que contém as 3 tabs com a navbar */}
+            {/* Telas Logadas */}
             <Stack.Screen name="MainApp" component={MainTabNavigator} />
-
-            {/* Estas telas são empilhadas sobre o tab navigator, escondendo a navbar */}
             <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="RegisterCase" component={RegisterCaseScreen} />
             <Stack.Screen
@@ -97,21 +79,32 @@ export default function AppNavigator() {
             <Stack.Screen name="CaseDetail" component={CaseDetailScreen} />
             <Stack.Screen name="Map" component={MapScreen} />
             <Stack.Screen name="MapPicker" component={MapPickerScreen} />
+            <Stack.Screen name="CaseDetails" component={CaseDetailScreen} />
           </>
         ) : (
           <>
-            {/* Telas de Autenticação e Públicas */}
+            {/* Telas Deslogadas */}
             <Stack.Screen name="BeforeLogin" component={BeforeLogin} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen
               name="ForgotPassword"
               component={ForgotPasswordScreen}
             />
+            <Stack.Screen 
+              name="VerifyCodeScreen" 
+              component={VerifyCodeScreen} 
+            />
             <Stack.Screen name="Register" component={RegisterScreen} />
           </>
         )}
+
+        {/* ### A CORREÇÃO ESTÁ AQUI ###
+          A 'ResetPasswordScreen' foi movida de volta para FORA do if/else.
+          Estando na "raiz" do Stack.Navigator, ela fica acessível
+          para a 'VerifyCodeScreen' (do stack "deslogado").
+        */}
         <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
-        <Stack.Screen name="CaseDetails" component={CaseDetailScreen} />
+        
       </Stack.Navigator>
     </NavigationContainer>
   );
