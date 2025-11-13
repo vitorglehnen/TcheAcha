@@ -208,7 +208,7 @@ export default function RegisterCaseScreen({ navigation }) {
       Alert.alert(
         "Sucesso!",
         `Caso ${isEditMode ? "atualizado" : "cadastrado"} com sucesso.`,
-        [{ text: "OK", onPress: () => navigation.navigate("MyCases") }]
+        [{ text: "OK", onPress: () => navigation.goBack() }]
       );
     } catch (error) {
       console.error("Erro ao salvar caso:", error);
