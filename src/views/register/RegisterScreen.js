@@ -37,11 +37,11 @@ export default function RegisterScreen({ navigation }) {
     setLoading(true);
     try {
       await signUp(nome, email, senha);
-      Alert.alert(
-        "Registro Concluído",
-        "Por favor, verifique seu e-mail para confirmar sua conta."
-      );
-      navigation.navigate("Login");
+      // Alert.alert(
+      //   "Registro Concluído",
+      //   "Por favor, verifique seu e-mail para confirmar sua conta."
+      // );
+      navigation.navigate("Home");
     } catch (error) {
       Alert.alert("Erro no Registro", error.message);
     } finally {
