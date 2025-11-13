@@ -68,6 +68,16 @@ export default function RegisterCaseScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
 
+  const onChangeDate = (event, selectedDate) => {
+    // Esconde o seletor de data
+    setShowDatePicker(false);
+
+    // Se o usuário selecionou uma data (não clicou em "cancelar")
+    if (selectedDate) {
+      setDate(selectedDate);
+    }
+  };
+
   // Efeito para carregar dados do usuário
   useEffect(() => {
     const loadUserData = async () => {
@@ -290,6 +300,7 @@ export default function RegisterCaseScreen({ navigation }) {
             is24Hour={true}
             display="default"
             onChange={onChangeDate}
+            maximumDate={new Date()}
           />
         )}
 
