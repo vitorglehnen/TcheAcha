@@ -33,13 +33,22 @@
           "apiKey": "YOUR_GOOGLE_MAPS_API_KEY_HERE"
         }
       },
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
+      "package": "com.henriqueexpo777.tche_acha"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-web-browser"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "e8b52c9a-b9b4-4c9e-8a52-c27911080bb8"
+      }
+    }
   }
 }
