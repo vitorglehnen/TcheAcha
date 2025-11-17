@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
@@ -23,6 +22,7 @@ import {
   markCaseAsActive,
 } from '../../controllers/caseController';
 import { COLORS } from '../../styles/globalStyles';
+import Alert from '../../components/alert/Alert';
 
 const MyCasesScreen = ({ navigation }) => {
   const [isMenuVisible, setMenuVisible] = useState(false);
@@ -33,6 +33,25 @@ const MyCasesScreen = ({ navigation }) => {
   const [pendingSightings, setPendingSightings] = useState([]);
   
   const isFocused = useIsFocused();
+
+  // State for custom alert
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertOnConfirm, setAlertOnConfirm] = useState(() => () => {});
+  const [alertOnCancel, setAlertOnCancel] = useState(null);
+  const [alertConfirmText, setAlertConfirmText] = useState('OK');
+  const [alertCancelText, setAlertCancelText] = useState('Cancel');
+
+  const showAlertMessage = (title, message, onConfirm = () => setShowAlert(false), onCancel = null, confirmText = 'OK', cancelText = 'Cancel') => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertOnConfirm(() => onConfirm);
+    setAlertOnCancel(onCancel ? () => onCancel : null);
+    setAlertConfirmText(confirmText);
+    setAlertCancelText(cancelText);
+    setShowAlert(true);
+  };
 
   // Função para carregar todos os dados do dashboard
   const loadDashboardData = async () => {
@@ -51,7 +70,7 @@ const MyCasesScreen = ({ navigation }) => {
       setPendingSightings(pendingSightings);
 
     } catch (error) {
-      Alert.alert("Erro", `Não foi possível carregar seus dados: ${error.message}`);
+      showAlertMessage("Erro", `Não foi possível carregar seus dados: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -70,9 +89,9 @@ const MyCasesScreen = ({ navigation }) => {
       await approveSighting(sightingId);
       // Remove o item da lista UI para feedback instantâneo
       setPendingSightings(prev => prev.filter(s => s.id !== sightingId));
-      Alert.alert("Sucesso", "Avistamento aprovado e agora está público na timeline do caso.");
+      showAlertMessage("Sucesso", "Avistamento aprovado e agora está público na timeline do caso.");
     } catch (error) {
-      Alert.alert("Erro", `Não foi possível aprovar o avistamento: ${error.message}`);
+      showAlertMessage("Erro", `Não foi possível aprovar o avistamento: ${error.message}`);
     }
   };
 
@@ -82,9 +101,9 @@ const MyCasesScreen = ({ navigation }) => {
       await rejectSighting(sightingId);
       // Remove o item da lista UI
       setPendingSightings(prev => prev.filter(s => s.id !== sightingId));
-      Alert.alert("Sucesso", "Avistamento rejeitado.");
+      showAlertMessage("Sucesso", "Avistamento rejeitado.");
     } catch (error) {
-      Alert.alert("Erro", `Não foi possível rejeitar o avistamento: ${error.message}`);
+      showAlertMessage("Erro", `Não foi possível rejeitar o avistamento: ${error.message}`);
     }
   };
 
@@ -94,9 +113,9 @@ const MyCasesScreen = ({ navigation }) => {
       await markCaseAsFound(caseId);
       // Atualiza a lista UI
       setMyCases(prev => prev.map(c => c.id === caseId ? { ...c, status: 'ENCONTRADO' } : c));
-      Alert.alert("Sucesso", "Caso marcado como 'Encontrado'.");
+      showAlertMessage("Sucesso", "Caso marcado como 'Encontrado'.");
     } catch (error) {
-      Alert.alert("Erro", `Não foi possível atualizar o caso: ${error.message}`);
+      showAlertMessage("Erro", `Não foi possível atualizar o caso: ${error.message}`);
     }
   };
 
@@ -106,9 +125,9 @@ const MyCasesScreen = ({ navigation }) => {
       await markCaseAsActive(caseId);
       // Atualiza a lista UI
       setMyCases(prev => prev.map(c => c.id === caseId ? { ...c, status: 'ATIVO' } : c));
-      Alert.alert("Sucesso", "Caso reaberto e marcado como 'Ativo'.");
+      showAlertMessage("Sucesso", "Caso reaberto e marcado como 'Ativo'.");
     } catch (error) {
-      Alert.alert("Erro", `Não foi possível reabrir o caso: ${error.message}`);
+      showAlertMessage("Erro", `Não foi possível reabrir o caso: ${error.message}`);
     }
   };
 
@@ -211,6 +230,15 @@ const MyCasesScreen = ({ navigation }) => {
           navigation={navigation}
         />
       )}
+      <Alert
+        isVisible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertOnConfirm}
+        onCancel={alertOnCancel}
+        confirmText={alertConfirmText}
+        cancelText={alertCancelText}
+      />
     </View>
   );
 };

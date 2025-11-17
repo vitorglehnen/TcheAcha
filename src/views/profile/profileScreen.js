@@ -8,7 +8,6 @@ import {
     SafeAreaView,
     StatusBar,
     ActivityIndicator,
-    Alert,
     TextInput,
     Modal,
     ScrollView,
@@ -19,6 +18,7 @@ import Header from "../../components/header/Header";
 import Menu from "../../components/menu/Menu";
 import { getUserData, updateUserProfile, uploadProfilePicture } from "../../controllers/authController";
 import * as ImagePicker from 'expo-image-picker'; 
+import Alert from '../../components/alert/Alert';
 
 export default function ProfileScreen({ navigation }) {
     const [isMenuVisible, setMenuVisible] = useState(false);
@@ -28,6 +28,25 @@ export default function ProfileScreen({ navigation }) {
     const [editField, setEditField] = useState("");
     const [editValue, setEditValue] = useState("");
     const [updating, setUpdating] = useState(false);
+
+    // State for custom alert
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertTitle, setAlertTitle] = useState('');
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertOnConfirm, setAlertOnConfirm] = useState(() => () => {});
+    const [alertOnCancel, setAlertOnCancel] = useState(null);
+    const [alertConfirmText, setAlertConfirmText] = useState('OK');
+    const [alertCancelText, setAlertCancelText] = useState('Cancel');
+
+    const showAlertMessage = (title, message, onConfirm = () => setShowAlert(false), onCancel = null, confirmText = 'OK', cancelText = 'Cancel') => {
+        setAlertTitle(title);
+        setAlertMessage(message);
+        setAlertOnConfirm(() => onConfirm);
+        setAlertOnCancel(onCancel ? () => onCancel : null);
+        setAlertConfirmText(confirmText);
+        setAlertCancelText(cancelText);
+        setShowAlert(true);
+    };
 
     useEffect(() => {
         loadUserData();
@@ -40,7 +59,7 @@ export default function ProfileScreen({ navigation }) {
             setUserData(data);
         } catch (error) {
             console.error("Erro ao carregar dados do usuário:", error);
-            Alert.alert("Erro", "Não foi possível carregar os dados do perfil.");
+            showAlertMessage("Erro", "Não foi possível carregar os dados do perfil.");
         } finally {
             setLoading(false);
         }
@@ -49,7 +68,7 @@ export default function ProfileScreen({ navigation }) {
     const handlePickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-            Alert.alert('Permissão negada', 'Precisamos de acesso à sua galeria para trocar a foto.');
+            showAlertMessage('Permissão negada', 'Precisamos de acesso à sua galeria para trocar a foto.');
             return;
         }
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -61,9 +80,9 @@ export default function ProfileScreen({ navigation }) {
             try {
                 const updatedUser = await uploadProfilePicture(result.assets[0].base64, userData.id);
                 setUserData(updatedUser);
-                Alert.alert("Sucesso", "Foto de perfil atualizada!");
+                showAlertMessage("Sucesso", "Foto de perfil atualizada!");
             } catch (error) {
-                Alert.alert("Erro", `Não foi possível atualizar sua foto: ${error.message}`);
+                showAlertMessage("Erro", `Não foi possível atualizar sua foto: ${error.message}`);
             } finally {
                 setUpdating(false);
             }
@@ -83,7 +102,7 @@ export default function ProfileScreen({ navigation }) {
 
     const handleSaveEdit = async () => {
         if (!editValue.trim() && editField !== "telefone") { 
-            Alert.alert("Erro", "O campo não pode estar vazio");
+            showAlertMessage("Erro", "O campo não pode estar vazio");
             return;
         }
         setUpdating(true);
@@ -91,9 +110,9 @@ export default function ProfileScreen({ navigation }) {
             const updatedData = await updateUserProfile({ [editField]: editValue.trim() || null });
             setUserData(updatedData);
             setEditModalVisible(false);
-            Alert.alert("Sucesso", "Dados atualizados com sucesso!");
+            showAlertMessage("Sucesso", "Dados atualizados com sucesso!");
         } catch (error) {
-            Alert.alert("Erro", "Não foi possível atualizar os dados.");
+            showAlertMessage("Erro", "Não foi possível atualizar os dados.");
         } finally {
             setUpdating(false);
         }
@@ -103,9 +122,9 @@ export default function ProfileScreen({ navigation }) {
         if (userData.status_verificacao === "NAO_VERIFICADO" || userData.status_verificacao === "REPROVADO") {
             navigation.navigate("VerifyIdentity");
         } else if (userData.status_verificacao === "PENDENTE") {
-            Alert.alert("Verificação Pendente", "Seus documentos estão em análise.");
+            showAlertMessage("Verificação Pendente", "Seus documentos estão em análise.");
         } else if (userData.status_verificacao === "APROVADO") {
-            Alert.alert("Verificação Aprovada", "Seus documentos já foram verificados!");
+            showAlertMessage("Verificação Aprovada", "Seus documentos já foram verificados!");
         }
     };
 
@@ -286,6 +305,15 @@ export default function ProfileScreen({ navigation }) {
                     </View>
                 </View>
             </Modal>
+            <Alert
+                isVisible={showAlert}
+                title={alertTitle}
+                message={alertMessage}
+                onConfirm={alertOnConfirm}
+                onCancel={alertOnCancel}
+                confirmText={alertConfirmText}
+                cancelText={alertCancelText}
+            />
         </SafeAreaView>
     );
 }

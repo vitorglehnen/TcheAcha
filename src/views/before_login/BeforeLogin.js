@@ -6,17 +6,36 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './BeforeLogin.styles';
 import { getActiveCasesForHome } from '../../controllers/caseController';
 import { useLocation } from '../../utils/locationHook';
+import Alert from '../../components/alert/Alert';
 
 const BeforeLogin = ({ navigation }) => {
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
   const { location, loading: locationLoading, error: locationError, getLocation } = useLocation();
+
+  // State for custom alert
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertOnConfirm, setAlertOnConfirm] = useState(() => () => {});
+  const [alertOnCancel, setAlertOnCancel] = useState(null);
+  const [alertConfirmText, setAlertConfirmText] = useState('OK');
+  const [alertCancelText, setAlertCancelText] = useState('Cancel');
+
+  const showAlertMessage = (title, message, onConfirm = () => setShowAlert(false), onCancel = null, confirmText = 'OK', cancelText = 'Cancel') => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertOnConfirm(() => onConfirm);
+    setAlertOnCancel(onCancel ? () => onCancel : null);
+    setAlertConfirmText(confirmText);
+    setAlertCancelText(cancelText);
+    setShowAlert(true);
+  };
 
   useEffect(() => {
     const fetchLocationAndCases = async () => {
@@ -45,7 +64,7 @@ const BeforeLogin = ({ navigation }) => {
         console.log("BeforeLogin: Casos públicos carregados:", fetchedCases?.length || 0);
       } catch (error) {
         console.error("BeforeLogin: Erro ao carregar casos:", error.message);
-        Alert.alert("Erro", "Não foi possível carregar os casos no momento.");
+        showAlertMessage("Erro", "Não foi possível carregar os casos no momento.");
         setCases([]);
       } finally {
         setLoading(false);
@@ -60,13 +79,13 @@ const BeforeLogin = ({ navigation }) => {
   };
 
   const handleAuxiliePress = () => {
-    Alert.alert(
+    showAlertMessage(
       "Login Necessário",
       "Para auxiliar ou ver mais detalhes, por favor, faça o login ou crie uma conta.",
-      [
-        { text: "Cancelar", style: "cancel" },
-        { text: "Fazer Login", onPress: handleLogin }
-      ]
+      handleLogin,
+      () => setShowAlert(false),
+      "Fazer Login",
+      "Cancelar"
     );
   };
 
@@ -144,6 +163,15 @@ const BeforeLogin = ({ navigation }) => {
           </Text>
         )}
       </ScrollView>
+      <Alert
+        isVisible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertOnConfirm}
+        onCancel={alertOnCancel}
+        confirmText={alertConfirmText}
+        cancelText={alertCancelText}
+      />
     </View>
   );
 };
