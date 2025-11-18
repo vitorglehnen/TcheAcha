@@ -304,6 +304,19 @@ export default function ProfileScreen({ navigation }) {
             <Ionicons name="chevron-forward" size={20} color="#6c757d" />
           </TouchableOpacity>
 
+          {userData.role === "ADMIN" && (
+            <TouchableOpacity
+              style={[styles.settingsButton, { backgroundColor: "#dff9fb" }]} // Estilo diferente
+              onPress={() => navigation.navigate("AdminDashboard")}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.settingsButtonText, { color: "#007BFF" }]}>
+                Painel Administrativo
+              </Text>
+              <Ionicons name="shield-checkmark" size={20} color="#007BFF" />
+            </TouchableOpacity>
+          )}
+
           {/* Status Cards */}
           <View style={styles.statusCardsContainer}>
             <TouchableOpacity

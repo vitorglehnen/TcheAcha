@@ -99,7 +99,14 @@ export default function VerifyIdentityScreen() {
       // Navega para a HomeScreen
       navigation.reset({
         index: 0,
-        routes: [{ name: "Home" }],
+        routes: [
+          {
+            name: "MainApp",
+            state: {
+              routes: [{ name: "Home" }],
+            },
+          },
+        ],
       });
     } catch (error) {
       console.error("Erro ao enviar para verificação:", error.message);

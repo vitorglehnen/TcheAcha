@@ -43,7 +43,7 @@ export const getUserData = async () => {
     // Busca os dados completos do usuário na tabela usuarios
     const { data: userData, error: dbError } = await supabase
       .from("usuarios")
-      .select("*")
+      .select("*, role")
       .eq("auth_user_id", user.id)
       .single();
 
@@ -52,7 +52,12 @@ export const getUserData = async () => {
       throw new Error(dbError.message);
     }
 
-    console.log("Dados do usuário obtidos:", userData);
+    console.log(
+      "Dados do usuário obtidos:",
+      userData.nome_completo,
+      "Role:",
+      userData.role
+    );
     return userData;
   } catch (error) {
     console.error("Erro em getUserData:", error);
