@@ -49,9 +49,9 @@ export default StyleSheet.create({
     alignItems: "center",
   },
   markerCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 30,
+    height: 30,
+    borderRadius: 22,
     backgroundColor: "#FF8C42",
     borderWidth: 3,
     borderColor: "#fff",
@@ -64,9 +64,9 @@ export default StyleSheet.create({
     elevation: 5,
   },
   markerImage: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 25,
+    height: 25,
+    borderRadius: 19,
   },
   markerPointer: {
     width: 0,
