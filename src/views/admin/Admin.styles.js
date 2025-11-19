@@ -47,8 +47,8 @@ export const styles = StyleSheet.create({
     marginTop: 4,
   },
   detailContainer: {
-    flex: 1,
     padding: 15,
+    paddingBottom: 50,
   },
   sectionTitle: {
     fontSize: 18,
@@ -62,20 +62,26 @@ export const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     marginBottom: 20,
+    elevation: 2,
   },
   imagePreviewContainer: {
-    marginVertical: 10,
+    marginVertical: 15,
+    backgroundColor: COLORS.white,
+    padding: 10,
+    borderRadius: 8,
+    elevation: 1,
   },
   imageLabel: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    marginBottom: 8,
+    fontSize: 16,
+    fontWeight: "600",
+    color: COLORS.textPrimary,
+    marginBottom: 10,
   },
   imagePreview: {
     width: "100%",
-    height: 250,
+    height: 300,
     borderRadius: 8,
-    backgroundColor: "#eee",
+    backgroundColor: "#f0f0f0",
     resizeMode: "contain",
     borderWidth: 1,
     borderColor: "#ddd",
@@ -83,8 +89,8 @@ export const styles = StyleSheet.create({
   actionButtonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 20,
-    paddingBottom: 20,
+    marginTop: 30,
+    marginBottom: 40,
   },
   actionButton: {
     flex: 1,
@@ -96,17 +102,34 @@ export const styles = StyleSheet.create({
   },
   approveButton: {
     backgroundColor: "#28a745",
-    marginRight: 10,
+    marginLeft: 10,
   },
   rejectButton: {
     backgroundColor: "#e74c3c",
-    marginLeft: 10,
+    marginRight: 10,
   },
   buttonText: {
     color: COLORS.white,
     fontWeight: "bold",
     fontSize: 16,
     marginLeft: 8,
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  fullScreenImage: {
+    width: "100%",
+    height: "80%",
+    resizeMode: "contain",
+  },
+  closeModalButton: {
+    position: "absolute",
+    top: 50,
+    right: 20,
+    padding: 10,
   },
 });
 
