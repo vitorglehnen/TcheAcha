@@ -21,6 +21,14 @@ const VerificationDetailScreen = ({ route, navigation }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  // Estado para armazenar as URLs temporárias assinadas
+  const [signedUrls, setSignedUrls] = useState({
+    selfie: null,
+    frente: null,
+    verso: null,
+  });
+
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
 
@@ -39,13 +47,53 @@ const VerificationDetailScreen = ({ route, navigation }) => {
       .single();
 
     if (error) {
-      Alert.alert("Erro", "Erro ao buscar usuário: " + error.message);
+      Alert.alert("Erro", "Não foi possível buscar usuário: " + error.message);
       navigation.goBack();
     } else {
-      console.log("Dados do usuário:", data);
       setUser(data);
+      // Após carregar os dados (que contêm os caminhos), gera as URLs assinadas
+      await generateSignedUrls(data);
     }
     setLoading(false);
+  };
+
+  // Função para gerar URLs temporárias (válidas por 1 hora)
+  const generateSignedUrls = async (userData) => {
+    try {
+      const urls = {};
+
+      // Lista de campos para processar
+      const imagesToSign = [
+        { key: "selfie", path: userData.documento_verificacao_url },
+        { key: "frente", path: userData.doc_frente_url },
+        { key: "verso", path: userData.doc_verso_url },
+      ];
+
+      for (const img of imagesToSign) {
+        if (img.path) {
+          // Se o caminho for uma URL completa antiga, tenta extrair o caminho relativo
+          // Caso contrário, usa o caminho direto
+          const path = img.path.includes("http")
+            ? img.path.split("/documentos_verificacao/")[1]
+            : img.path;
+
+          if (path) {
+            const { data, error } = await supabase.storage
+              .from("documentos_verificacao")
+              .createSignedUrl(path, 3600); // Link válido por 60 minutos
+
+            if (data?.signedUrl) {
+              urls[img.key] = data.signedUrl;
+            } else if (error) {
+              console.log(`Erro ao assinar ${img.key}:`, error.message);
+            }
+          }
+        }
+      }
+      setSignedUrls(urls);
+    } catch (error) {
+      console.error("Erro ao gerar URLs assinadas:", error);
+    }
   };
 
   const handleUpdateStatus = async (newStatus) => {
@@ -82,15 +130,10 @@ const VerificationDetailScreen = ({ route, navigation }) => {
           onPress={() => openImage(imageUrl)}
           activeOpacity={0.8}
         >
-          {/* key para forçar re-render se a URL mudar */}
           <Image
-            key={imageUrl}
             source={{ uri: imageUrl }}
             style={styles.imagePreview}
-            // onLoadStart={() => console.log(`Carregando ${label}...`)}
-            onError={(e) =>
-              console.log(`Erro ao carregar ${label}:`, e.nativeEvent.error)
-            }
+            resizeMode="contain"
           />
           <Text
             style={{
@@ -137,12 +180,11 @@ const VerificationDetailScreen = ({ route, navigation }) => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <Header
-        title="Análise de Documentos"
+        title="Analisar Documentos"
         leftIcon="arrow-back"
         onLeftPress={() => navigation.goBack()}
         showLogo={false}
       />
-
       <ScrollView contentContainerStyle={styles.detailContainer}>
         {user && (
           <>
@@ -152,19 +194,18 @@ const VerificationDetailScreen = ({ route, navigation }) => {
               <Text style={styles.itemSubText}>{user.email}</Text>
             </View>
 
+            {/* Usa as URLs assinadas do estado */}
             <RenderImageSection
               label="Selfie de Verificação:"
-              imageUrl={user.documento_verificacao_url}
+              imageUrl={signedUrls.selfie}
             />
-
             <RenderImageSection
               label="Documento (Frente):"
-              imageUrl={user.doc_frente_url}
+              imageUrl={signedUrls.frente}
             />
-
             <RenderImageSection
               label="Documento (Verso):"
-              imageUrl={user.doc_verso_url}
+              imageUrl={signedUrls.verso}
             />
 
             <View style={styles.actionButtonContainer}>
@@ -186,7 +227,6 @@ const VerificationDetailScreen = ({ route, navigation }) => {
                   </>
                 )}
               </TouchableOpacity>
-
               <TouchableOpacity
                 style={[styles.actionButton, styles.approveButton]}
                 onPress={() => handleUpdateStatus("APROVADO")}
@@ -210,7 +250,6 @@ const VerificationDetailScreen = ({ route, navigation }) => {
         )}
       </ScrollView>
 
-      {/* ver tem tela cheia */}
       <Modal
         visible={modalVisible}
         transparent={true}

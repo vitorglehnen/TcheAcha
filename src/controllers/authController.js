@@ -201,27 +201,20 @@ export const uploadVerificationDocuments = async (
     if (versoUpload.error) throw versoUpload.error;
 
     // Obtém as URLs públicas (ou URLs assinadas, se preferir mais segurança)
-    const { data: selfieUrlData } = supabase.storage
-      .from(bucketName)
-      .getPublicUrl(selfieUpload.data.path);
-    const { data: frenteUrlData } = supabase.storage
-      .from(bucketName)
-      .getPublicUrl(frenteUpload.data.path);
-    const { data: versoUrlData } = supabase.storage
-      .from(bucketName)
-      .getPublicUrl(versoUpload.data.path);
+    //const { data: selfieUrlData } = supabase.storage.from(bucketName).getPublicUrl(selfieUpload.data.path);
+    //const { data: frenteUrlData } = supabase.storage.from(bucketName).getPublicUrl(frenteUpload.data.path);
+    //const { data: versoUrlData } = supabase.storage.from(bucketName).getPublicUrl(versoUpload.data.path);
 
     const updates = {
-      documento_verificacao_url: selfieUrlData.publicUrl, // Assumindo que este campo é para a selfie
-      doc_frente_url: frenteUrlData.publicUrl,
-      doc_verso_url: versoUrlData.publicUrl,
+      documento_verificacao_url: selfieUpload.data.path, // Ex: "user_id/selfie.jpg"
+      doc_frente_url: frenteUpload.data.path,
+      doc_verso_url: versoUpload.data.path,
     };
 
-    console.log("Controller: URLs para atualizar:", updates);
+    console.log("Controller: Caminhos salvos para atualização:", updates);
 
     // Salva as novas URLs no perfil do usuário
     await updateUserProfile(updates);
-
     return updates;
   } catch (error) {
     console.error("Controller: Erro no upload dos documentos:", error.message);
