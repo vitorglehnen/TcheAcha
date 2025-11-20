@@ -1,103 +1,93 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
+import React from "react";
+import { View, Text, TouchableOpacity, ScrollView, Alert, SafeAreaView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./SettingsScreen.styles";
-import NavBar from "../../components/navbar/NavBar";
 import Header from "../../components/header/Header";
-import Menu from "../../components/menu/Menu";
+import { supabase } from "../../lib/supabase";
+import { sendPasswordResetEmail, getCurrentUser } from "../../controllers/authController";
 
 export default function SettingsScreen({ navigation }) {
-  const [isMenuVisible, setMenuVisible] = useState(false);
+
+  // Função para fazer logout
+  const handleLogout = () => {
+    Alert.alert(
+      "Sair do aplicativo",
+      "Tem certeza que deseja sair?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { 
+          text: "Sair", 
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const { error } = await supabase.auth.signOut();
+              if (error) throw error;
+              // O AppNavigator irá detectar a mudança e levar para o Login
+            } catch (error) {
+              console.error('Erro ao fazer logout:', error.message);
+              Alert.alert('Erro', 'Não foi possível sair. Tente novamente.');
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  // Função para alterar senha
+  const handleChangePassword = async () => {
+    Alert.alert(
+      "Alterar Senha",
+      "Você receberá um e-mail com instruções para redefinir sua senha. Deseja continuar?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { 
+          text: "Enviar e-mail", 
+          onPress: async () => {
+            try {
+              const user = await getCurrentUser();
+              if (!user || !user.email) {
+                throw new Error("Não foi possível encontrar seu e-mail.");
+              }
+              await sendPasswordResetEmail(user.email);
+              Alert.alert(
+                "Verifique seu E-mail",
+                `Enviamos um link de redefinição de senha para ${user.email}.`
+              );
+            } catch (error) {
+              Alert.alert("Erro", error.message);
+            }
+          }
+        }
+      ]
+    );
+  };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#fff' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <Header
-          title="Configurações"
-          leftIcon="menu"
-          onLeftPress={() => setMenuVisible(true)}
-          showLogo={true}
+        title="Configurações"
+        leftIcon="arrow-back"
+        onLeftPress={() => navigation.goBack()}
+        showLogo={true}
       />
-      <ScrollView contentContainerStyle={styles.container}>      
-      {/* Account Section */}
-      <View style={styles.section}>
-        <TouchableOpacity style={styles.item}>
-          <Text style={styles.itemText}>Alterar e-mail de login</Text>
-          <Ionicons name="chevron-forward" size={20} color="#222" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.item}>
-          <Text style={styles.itemText}>Alterar senha de acesso</Text>
-          <Ionicons name="chevron-forward" size={20} color="#222" />
-        </TouchableOpacity>
-      </View>
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* Seção de Conta */}
+        <View style={styles.section}>
+          <TouchableOpacity style={styles.item} onPress={handleChangePassword}>
+            <Text style={styles.itemText}>Alterar senha de acesso</Text>
+            <Ionicons name="chevron-forward" size={20} color="#222" />
+          </TouchableOpacity>
+        </View>
 
-      {/* Options Section */}
-      <View style={styles.section}>
-        <TouchableOpacity style={styles.item}>
-          <Text style={styles.itemText}>Alterar idioma do aplicativo</Text>
-          <Ionicons name="chevron-forward" size={20} color="#222" />
+        {/* Seção de Sair */}
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutText}>Sair do aplicativo</Text>
+          <Ionicons name="exit-outline" size={22} color="#e74c3c" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.item}>
-          <Text style={styles.itemText}>Notificações</Text>
-          <Ionicons name="chevron-forward" size={20} color="#222" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.item}>
-          <Text style={styles.itemText}>Autentificação por dois fatores</Text>
-          <Ionicons name="chevron-forward" size={20} color="#222" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.item}>
-          <Text style={styles.itemText}>Opção 3</Text>
-          <Ionicons name="chevron-forward" size={20} color="#222" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.item}>
-          <Text style={styles.itemText}>Widget</Text>
-          <Ionicons name="chevron-forward" size={20} color="#222" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.item}>
-          <Text style={styles.itemText}>Termos e condições do aplicativo</Text>
-          <Ionicons name="open-outline" size={20} color="#222" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.item}>
-          <Text style={styles.itemText}>Como funciona nosso aplicativo?</Text>
-          <Ionicons name="open-outline" size={20} color="#222" />
-        </TouchableOpacity>
-      </View>
 
-      {/* Share Section */}
-      <TouchableOpacity style={styles.shareButton}>
-        <Text style={styles.shareText}>Compartilhe o app com um amigo</Text>
-        <Ionicons name="open-outline" size={22} color="#fff" />
-      </TouchableOpacity>
-
-      {/* Theme Section */}
-      <View style={styles.section}>
-        <TouchableOpacity style={styles.item}>
-          <Text style={styles.itemText}>Tema do aplicativo</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Logout */}
-      <TouchableOpacity style={styles.logoutButton}>
-        <Text style={styles.logoutText}>Sair do aplicativo</Text>
-        <Ionicons name="exit-outline" size={22} color="#e74c3c" />
-      </TouchableOpacity>
+        <View style={{ height: 40 }} />
+      </ScrollView>
       
-      <View style={{ height: 40 }} />
-    </ScrollView>
-
-    {/* Bottom Navigation */}
-    <NavBar
-      onHomePress={() => navigation?.navigate('Home')}
-      onProfilePress={() => navigation?.navigate('Profile')}
-      activeScreen="Settings"
-    />
-
-    {isMenuVisible && (
-        <Menu
-          visible={isMenuVisible}
-          onClose={() => setMenuVisible(false)}
-          navigation={navigation}
-        />
-    )}
-    </View>
+    </SafeAreaView>
   );
 }

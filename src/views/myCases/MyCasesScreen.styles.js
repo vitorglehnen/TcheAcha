@@ -1,5 +1,5 @@
-import { StyleSheet } from 'react-native';
-import { COLORS } from '../../styles/globalStyles';
+import { StyleSheet } from "react-native";
+import { COLORS } from "../../styles/globalStyles";
 
 export const styles = StyleSheet.create({
   mainContainer: {
@@ -11,20 +11,20 @@ export const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     minHeight: 200,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.textPrimary,
     marginHorizontal: 15,
     marginTop: 20,
     marginBottom: 10,
   },
   emptyStateText: {
-    textAlign: 'center',
+    textAlign: "center",
     color: COLORS.textSecondary,
     marginTop: 20,
     marginHorizontal: 15,
@@ -35,7 +35,7 @@ export const styles = StyleSheet.create({
     marginBottom: 10,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#eee',
+    borderColor: "#eee",
     padding: 15,
   },
   sightingCaseTitle: {
@@ -49,35 +49,35 @@ export const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sightingImage: {
-    width: '100%',
+    width: "100%",
     height: 150,
     borderRadius: 8,
     marginBottom: 10,
   },
   sightingActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 10,
   },
   actionButton: {
     flex: 1,
     paddingVertical: 10,
     borderRadius: 6,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
   },
   approveButton: {
-    backgroundColor: '#28a745',
+    backgroundColor: "#28a745",
     marginRight: 5,
   },
   rejectButton: {
-    backgroundColor: '#e74c3c',
+    backgroundColor: "#e74c3c",
     marginLeft: 5,
   },
   actionButtonText: {
     color: COLORS.white,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 14,
     marginLeft: 8,
   },
@@ -87,18 +87,18 @@ export const styles = StyleSheet.create({
     marginBottom: 10,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#eee',
+    borderColor: "#eee",
     padding: 15,
   },
   caseCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
   caseName: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.textPrimary,
     flex: 1,
   },
@@ -108,7 +108,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   statusActive: {
-    backgroundColor: '#28a745',
+    backgroundColor: "#28a745",
   },
   statusInactive: {
     backgroundColor: COLORS.textSecondary,
@@ -116,20 +116,20 @@ export const styles = StyleSheet.create({
   statusText: {
     color: COLORS.white,
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   caseActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "flex-start",
     marginTop: 15,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: "#f0f0f0",
     paddingTop: 15,
   },
   caseButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f0f0f0",
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 6,
@@ -139,5 +139,24 @@ export const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     marginLeft: 6,
     fontSize: 14,
+  },
+  fab: {
+    position: "absolute",
+    bottom: 100,
+    right: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: COLORS.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+  },
+  fabDisabled: {
+    backgroundColor: "#ccc",
   },
 });

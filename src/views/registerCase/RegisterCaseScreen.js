@@ -302,6 +302,7 @@ export default function RegisterCaseScreen({ navigation }) {
             is24Hour={true}
             display="default"
             onChange={onChangeDate}
+            maximumDate={new Date()}
           />
         )}
 

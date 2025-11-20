@@ -1,19 +1,19 @@
-import { StyleSheet } from 'react-native';
-import { COLORS } from '../../styles/globalStyles';
+import { StyleSheet } from "react-native";
+import { COLORS } from "../../styles/globalStyles";
 
 export const styles = StyleSheet.create({
   navBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: COLORS.primary,
     borderRadius: 25,
     marginHorizontal: 20,
     paddingVertical: 12,
-    position: 'absolute',
+    position: "absolute",
     bottom: 20,
     left: 20,
     right: 20,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -21,24 +21,14 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+    justifyContent: "space-around",
   },
   navButton: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',  
-  },
-  plusButton: {
-    backgroundColor: COLORS.white,
-    width: 60,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   icon: {
-      color: COLORS.textPrimary,
+    color: COLORS.white,
   },
-  plusIcon: {
-      color: COLORS.primary,
-  }
 });

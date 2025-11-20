@@ -49,9 +49,9 @@ export default StyleSheet.create({
     alignItems: "center",
   },
   markerCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 30,
+    height: 30,
+    borderRadius: 22,
     backgroundColor: "#FF8C42",
     borderWidth: 3,
     borderColor: "#fff",
@@ -64,9 +64,9 @@ export default StyleSheet.create({
     elevation: 5,
   },
   markerImage: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 25,
+    height: 25,
+    borderRadius: 19,
   },
   markerPointer: {
     width: 0,
@@ -97,6 +97,35 @@ export default StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
+  },
+  filterBadge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#FF3B30",
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
+  // Loading Overlay
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 999,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: "#fff",
+    fontWeight: "600",
   },
   // Card de Detalhes
   caseDetailsCard: {
