@@ -5,8 +5,7 @@ import {
   View, 
   Text, 
   TextInput, 
-  TouchableOpacity, 
-  Alert, 
+  TouchableOpacity,  
   ActivityIndicator, 
   Image,
   ScrollView,
@@ -16,6 +15,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './ForgotPassword.styles';
 import { supabase } from '../../lib/supabase';
+import Alert from '../../components/alert/Alert';
 
 export default function ForgotPasswordScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -23,8 +23,28 @@ export default function ForgotPasswordScreen({ navigation }) {
 
   // 1. A função foi renomeada e a lógica trocada
   const handleRequestCode = async () => {
+  // State for custom alert
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertOnConfirm, setAlertOnConfirm] = useState(() => () => {});
+  const [alertOnCancel, setAlertOnCancel] = useState(null);
+  const [alertConfirmText, setAlertConfirmText] = useState('OK');
+  const [alertCancelText, setAlertCancelText] = useState('Cancel');
+
+  const showAlertMessage = (title, message, onConfirm = () => setShowAlert(false), onCancel = null, confirmText = 'OK', cancelText = 'Cancel') => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertOnConfirm(() => onConfirm);
+    setAlertOnCancel(onCancel ? () => onCancel : null);
+    setAlertConfirmText(confirmText);
+    setAlertCancelText(cancelText);
+    setShowAlert(true);
+  };
+
+  const handlePasswordReset = async () => {
     if (!email) {
-      Alert.alert('Erro', 'Por favor, insira seu e-mail.');
+      showAlertMessage('Erro', 'Por favor, insira seu e-mail.');
       return;
     }
     setLoading(true);
@@ -42,10 +62,9 @@ export default function ForgotPasswordScreen({ navigation }) {
     setLoading(false);
 
     if (error) {
-      Alert.alert('Erro', error.message);
+      showAlertMessage('Erro', error.message);
     } else {
-      // 3. Texto do alerta modificado
-      Alert.alert(
+      showAlertMessage(
         'Verifique seu E-mail',
         'Um código de 6 dígitos foi enviado para o seu e-mail.'
       );
@@ -103,6 +122,15 @@ export default function ForgotPasswordScreen({ navigation }) {
           {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.buttonText}>Enviar código</Text>}
         </TouchableOpacity>
       </ScrollView>
+      <Alert
+        isVisible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertOnConfirm}
+        onCancel={alertOnCancel}
+        confirmText={alertConfirmText}
+        cancelText={alertCancelText}
+      />
     </KeyboardAvoidingView>
   );
 }

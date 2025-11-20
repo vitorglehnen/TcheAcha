@@ -8,12 +8,12 @@ export const signIn = async (email, password) => {
   });
 
   if (error) {
-    console.error("Erro no supabase.auth.signInWithPassword:", error);
+    console.warn("Erro no supabase.auth.signInWithPassword:", error);
     throw new Error(error.message);
   }
 
   if (!data.session) {
-    console.error("Login falhou: Nenhuma sessão retornada.");
+    console.warn("Login falhou: Nenhuma sessão retornada.");
     throw new Error("Login failed: No session returned.");
   }
 
@@ -36,26 +36,31 @@ export const getUserData = async () => {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      console.error("Erro ao obter usuário autenticado:", authError);
+      console.warn("Erro ao obter usuário autenticado:", authError);
       throw new Error("Usuário não autenticado");
     }
 
     // Busca os dados completos do usuário na tabela usuarios
     const { data: userData, error: dbError } = await supabase
       .from("usuarios")
-      .select("*")
+      .select("*, role")
       .eq("auth_user_id", user.id)
       .single();
 
     if (dbError) {
-      console.error("Erro ao buscar dados do usuário:", dbError);
+      console.warn("Erro ao buscar dados do usuário:", dbError);
       throw new Error(dbError.message);
     }
 
-    console.log("Dados do usuário obtidos:", userData);
+    console.log(
+      "Dados do usuário obtidos:",
+      userData.nome_completo,
+      "Role:",
+      userData.role
+    );
     return userData;
   } catch (error) {
-    console.error("Erro em getUserData:", error);
+    console.warn("Erro em getUserData:", error);
     throw error;
   }
 };
@@ -69,7 +74,7 @@ export const updateUserProfile = async (updates) => {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      console.error("Erro ao obter usuário autenticado:", authError);
+      console.warn("Erro ao obter usuário autenticado:", authError);
       throw new Error("Usuário não autenticado");
     }
 
@@ -85,7 +90,7 @@ export const updateUserProfile = async (updates) => {
       .single();
 
     if (updateError) {
-      console.error("Erro ao atualizar perfil do usuário:", updateError);
+      console.warn("Erro ao atualizar perfil do usuário:", updateError);
       throw new Error(updateError.message);
     }
 
@@ -93,7 +98,7 @@ export const updateUserProfile = async (updates) => {
     // Retorna os dados do perfil E o email do auth.user
     return { ...data, email: user.email };
   } catch (error) {
-    console.error("Erro em updateUserProfile:", error);
+    console.warn("Erro em updateUserProfile:", error);
     throw error;
   }
 };
@@ -207,19 +212,18 @@ export const uploadVerificationDocuments = async (
       .getPublicUrl(versoUpload.data.path);
 
     const updates = {
-      documento_verificacao_url: selfieUrlData.publicUrl, // Assumindo que este campo é para a selfie
+      documento_verificacao_url: selfieUrlData.publicUrl,
       doc_frente_url: frenteUrlData.publicUrl,
       doc_verso_url: versoUrlData.publicUrl,
     };
 
-    console.log("Controller: URLs para atualizar:", updates);
+    console.log("Controller: Caminhos salvos para atualização:", updates);
 
     // Salva as novas URLs no perfil do usuário
     await updateUserProfile(updates);
-
     return updates;
   } catch (error) {
-    console.error("Controller: Erro no upload dos documentos:", error.message);
+    console.warn("Controller: Erro no upload dos documentos:", error.message);
     throw new Error(`Erro ao fazer upload: ${error.message}`);
   }
 };
@@ -238,12 +242,12 @@ export const signUp = async (nome, email, senha) => {
   });
 
   if (authError) {
-    console.error("Erro no supabase.auth.signUp:", authError);
+    console.warn("Erro no supabase.auth.signUp:", authError);
     throw new Error(authError.message);
   }
 
   if (!authData.user) {
-    console.error(
+    console.warn(
       "Falha na autenticação: Nenhum usuário retornado após signUp."
     );
     throw new Error("Authentication failed: No user data returned.");
@@ -261,7 +265,7 @@ export const signUp = async (nome, email, senha) => {
   ]);
 
   if (dbError) {
-    console.error("Erro ao inserir usuário no banco de dados:", dbError);
+    console.warn("Erro ao inserir usuário no banco de dados:", dbError);
     throw new Error(dbError.message);
   }
 
@@ -274,7 +278,7 @@ export const sendPasswordResetEmail = async (email) => {
   const { error } = await supabase.auth.resetPasswordForEmail(email);
 
   if (error) {
-    console.error("Erro ao enviar e-mail de redefinição de senha:", error);
+    console.warn("Erro ao enviar e-mail de redefinição de senha:", error);
     throw new Error(error.message);
   }
 
@@ -286,7 +290,7 @@ export const updateUserPassword = async (newPassword) => {
   const { error } = await supabase.auth.updateUser({ password: newPassword });
 
   if (error) {
-    console.error("Erro ao atualizar a senha:", error);
+    console.warn("Erro ao atualizar a senha:", error);
     throw new Error(error.message);
   }
 
@@ -296,7 +300,7 @@ export const updateUserPassword = async (newPassword) => {
 export const signOut = async () => {
   const { error } = await supabase.auth.signOut();
   if (error) {
-    console.error("Erro ao fazer logout:", error);
+    console.warn("Erro ao fazer logout:", error);
     throw error;
   }
 };

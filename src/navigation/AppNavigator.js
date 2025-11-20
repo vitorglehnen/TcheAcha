@@ -25,6 +25,10 @@ import MapScreen from "../views/map/MapScreen";
 import MapPickerScreen from "../views/mapPicker/MapPickerScreen";
 import MyCasesScreen from "../views/myCases/MyCasesScreen";
 
+import AdminDashboardScreen from "../views/admin/AdminDashboardScreen";
+import VerificationListScreen from "../views/admin/VerificationListScreen";
+import VerificationDetailScreen from "../views/admin/VerificationDetailScreen";
+import ReportListScreen from "../views/admin/ReportListScreen";
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -82,6 +86,19 @@ export default function AppNavigator() {
             <Stack.Screen name="MapPicker" component={MapPickerScreen} />
             <Stack.Screen name="CaseDetails" component={CaseDetailScreen} />
             <Stack.Screen name="MyCases" component={MyCasesScreen} />
+            <Stack.Screen
+              name="AdminDashboard"
+              component={AdminDashboardScreen}
+            />
+            <Stack.Screen
+              name="VerificationList"
+              component={VerificationListScreen}
+            />
+            <Stack.Screen
+              name="VerificationDetail"
+              component={VerificationDetailScreen}
+            />
+            <Stack.Screen name="ReportList" component={ReportListScreen} />
           </>
         ) : (
           <>

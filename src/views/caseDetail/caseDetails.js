@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
-  Alert,
   TextInput,
   KeyboardAvoidingView,
   Platform,
@@ -29,6 +28,7 @@ import { COLORS } from '../../styles/globalStyles';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import Alert from '../../components/alert/Alert';
 
 // --- Componente TimelineItem ---
 const TimelineItem = ({ item, type, currentProfileId, onDelete, onReport, onImagePress }) => {
@@ -137,11 +137,32 @@ const CaseDetailScreen = ({ navigation }) => {
   const [reportReason, setReportReason] = useState("");
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
 
+  // State for custom alert
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertOnConfirm, setAlertOnConfirm] = useState(() => () => {});
+  const [alertOnCancel, setAlertOnCancel] = useState(null);
+  const [alertConfirmText, setAlertConfirmText] = useState('OK');
+  const [alertCancelText, setAlertCancelText] = useState('Cancel');
+  const [alertInput, setAlertInput] = useState(null);
+
+  const showAlertMessage = (title, message, onConfirm = () => setShowAlert(false), onCancel = null, confirmText = 'OK', cancelText = 'Cancel', input = null) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertOnConfirm(() => onConfirm);
+    setAlertOnCancel(onCancel ? () => onCancel : null);
+    setAlertConfirmText(confirmText);
+    setAlertCancelText(cancelText);
+    setAlertInput(input);
+    setShowAlert(true);
+  };  
+
   useEffect(() => {
     const loadData = async () => {
       const caseId = casoFromParams?.id;
       if (!caseId) {
-        Alert.alert("Erro", "ID do caso não encontrado.");
+        showAlertMessage("Erro", "ID do caso não encontrado.");
         setError("ID do caso não fornecido."); setLoading(false); return;
       }
       setLoading(true); setError(null);
@@ -155,7 +176,7 @@ const CaseDetailScreen = ({ navigation }) => {
         setSightings(fetchedSightings);
         setComments(fetchedComments);
       } catch (err) {
-        setError(err.message); Alert.alert("Erro", `Não foi possível carregar os detalhes: ${err.message}`);
+        setError(err.message); showAlertMessage("Erro", `Não foi possível carregar os detalhes: ${err.message}`);
       } finally {
         setLoading(false);
       }
@@ -183,7 +204,7 @@ const CaseDetailScreen = ({ navigation }) => {
   /** Navega para a tela de reportar avistamento */
   const handleReportSighting = () => {
     if (!isUserVerified) {
-      Alert.alert("Verificação Necessária", "Você precisa ser um usuário verificado para reportar um avistamento.");
+      showAlertMessage("Verificação Necessária", "Você precisa ser um usuário verificado para reportar um avistamento.");
       return;
     }
     setSightingDesc("");
@@ -195,14 +216,14 @@ const CaseDetailScreen = ({ navigation }) => {
 
   /** Adiciona um novo comentário */
   const handleAddNewComment = async () => {
-    if (newComment.trim() === "") { Alert.alert("Erro", "O comentário não pode estar vazio."); return; }
+    if (newComment.trim() === "") { showAlertMessage("Erro", "O comentário não pode estar vazio."); return; }
     setIsSubmittingComment(true);
     try {
       const addedComment = await createComment(caseDetails.id, currentProfileId, newComment);
       setComments(prevComments => [...prevComments, addedComment]);
       setNewComment("");
     } catch (err) {
-      Alert.alert("Erro", `Não foi possível adicionar o comentário: ${err.message}`);
+      showAlertMessage("Erro", `Não foi possível adicionar o comentário: ${err.message}`);
     } finally {
       setIsSubmittingComment(false);
     }
@@ -213,7 +234,7 @@ const CaseDetailScreen = ({ navigation }) => {
   /** Abre o modal de denúncia */
   const handleReport = (item, type) => {
     if (!isUserVerified) {
-      Alert.alert("Verificação Necessária", "Você precisa estar verificado para denunciar um conteúdo.");
+      showAlertMessage("Verificação Necessária", "Você precisa estar verificado para denunciar um conteúdo.");
       return;
     }
     setReportingItem({ item, type });
@@ -224,7 +245,7 @@ const CaseDetailScreen = ({ navigation }) => {
   /** Envia a denúncia do modal */
   const handleSubmitReport = async () => {
     if (reportReason.trim() === "") {
-      Alert.alert("Erro", "O motivo da denúncia não pode estar vazio.");
+      showAlertMessage("Erro", "O motivo da denúncia não pode estar vazio.");
       return;
     }
     if (!reportingItem) return;
@@ -232,18 +253,18 @@ const CaseDetailScreen = ({ navigation }) => {
     setIsSubmittingReport(true);
     try {
       await reportContent(reportingItem.type, reportingItem.item.id, reportReason, currentProfileId);
-      Alert.alert("Denúncia Enviada", "Sua denúncia foi registrada e será analisada.");
+      showAlertMessage("Denúncia Enviada", "Sua denúncia foi registrada e será analisada.");
       setReportModalVisible(false);
       setReportingItem(null);
     } catch (error) {
-      Alert.alert("Erro", `Não foi possível enviar a denúncia: ${error.message}`);
+      showAlertMessage("Erro", `Não foi possível enviar a denúncia: ${error.message}`);
     } finally {
       setIsSubmittingReport(false);
     }
   };
 
   const handleDeleteComment = (commentId) => {
-    Alert.alert( "Excluir Comentário", "Tem certeza?",
+    showAlertMessage( "Excluir Comentário", "Tem certeza?",
       [
         { text: "Cancelar", style: "cancel" },
         { text: "Excluir", style: "destructive", onPress: async () => {
@@ -251,7 +272,7 @@ const CaseDetailScreen = ({ navigation }) => {
             await deleteUserComment(commentId, currentProfileId);
             setComments(prev => prev.filter(c => c.id !== commentId));
           } catch (error) {
-            Alert.alert("Erro", `Não foi possível excluir o comentário: ${error.message}`);
+            showAlertMessage("Erro", `Não foi possível excluir o comentário: ${error.message}`);
           }
         }}
       ]
@@ -259,7 +280,7 @@ const CaseDetailScreen = ({ navigation }) => {
   };
 
   const handleDeleteSighting = (sightingId) => {
-    Alert.alert( "Excluir Avistamento", "Tem certeza?",
+    showAlertMessage( "Excluir Avistamento", "Tem certeza?",
       [
         { text: "Cancelar", style: "cancel" },
         { text: "Excluir", style: "destructive", onPress: async () => {
@@ -267,7 +288,7 @@ const CaseDetailScreen = ({ navigation }) => {
             await deleteUserSighting(sightingId, currentProfileId);
             setSightings(prev => prev.filter(s => s.id !== sightingId));
           } catch (error) {
-            Alert.alert("Erro", `Não foi possível excluir o avistamento: ${error.message}`);
+            showAlertMessage("Erro", `Não foi possível excluir o avistamento: ${error.message}`);
           }
         }}
       ]
@@ -285,20 +306,20 @@ const CaseDetailScreen = ({ navigation }) => {
   const handlePickLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permissão negada', 'Precisamos da sua permissão.'); return;
+      showAlertMessage('Permissão negada', 'Precisamos da sua permissão.'); return;
     }
     try {
       let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
       setSightingLocation(location.coords);
     } catch (error) {
-      Alert.alert('Erro ao pegar localização', 'Não foi possível obter a localização.');
+      showAlertMessage('Erro ao pegar localização', 'Não foi possível obter a localização.');
     }
   };
   /** Pede permissão e abre a galeria */
   const handlePickImage = async () => {
     let { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permissão negada', 'Precisamos da sua permissão.'); return;
+      showAlertMessage('Permissão negada', 'Precisamos da sua permissão.'); return;
     }
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -311,7 +332,7 @@ const CaseDetailScreen = ({ navigation }) => {
   /** Envia o avistamento para o Controller */
   const handleSubmitSighting = async () => {
     if (!sightingDesc.trim() || !sightingLocation || !sightingDate) {
-      Alert.alert('Campos obrigatórios', 'Descrição, localização e data são obrigatórios.');
+      showAlertMessage('Campos obrigatórios', 'Descrição, localização e data são obrigatórios.');
       return;
     }
     setIsSubmittingSighting(true);
@@ -324,10 +345,10 @@ const CaseDetailScreen = ({ navigation }) => {
         location: sightingLocation,
         dataAvistamento: sightingDate,
       });
-      Alert.alert('Sucesso!', 'Seu avistamento foi enviado e aguarda validação.');
+      showAlertMessage('Sucesso!', 'Seu avistamento foi enviado e aguarda validação.');
       setSightingModalVisible(false);
     } catch (error) {
-      Alert.alert('Erro ao enviar', error.message);
+      showAlertMessage('Erro ao enviar', error.message);
     } finally {
       setIsSubmittingSighting(false);
     }
@@ -524,6 +545,16 @@ const CaseDetailScreen = ({ navigation }) => {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+      <Alert
+        isVisible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertOnConfirm}
+        onCancel={alertOnCancel}
+        confirmText={alertConfirmText}
+        cancelText={alertCancelText}
+        input={alertInput}
+      />
 
       {/* --- MODAL DE ZOOM DE IMAGEM --- */}
       <Modal
