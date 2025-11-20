@@ -5,12 +5,12 @@ import {
   TouchableOpacity,
   Image,
   Pressable,
-  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { styles } from "./DocumentCaptureScreen.styles";
+import Alert from '../../components/alert/Alert';
 
 export default function DocumentCaptureScreen() {
   const navigation = useNavigation();
@@ -25,10 +25,29 @@ export default function DocumentCaptureScreen() {
   // Preserva o base64 da selfie se ele já existir
   const selfieBase64 = route.params?.selfieBase64 || null;
 
+  // State for custom alert
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertOnConfirm, setAlertOnConfirm] = useState(() => () => {});
+  const [alertOnCancel, setAlertOnCancel] = useState(null);
+  const [alertConfirmText, setAlertConfirmText] = useState('OK');
+  const [alertCancelText, setAlertCancelText] = useState('Cancel');
+
+  const showAlertMessage = (title, message, onConfirm = () => setShowAlert(false), onCancel = null, confirmText = 'OK', cancelText = 'Cancel') => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertOnConfirm(() => onConfirm);
+    setAlertOnCancel(onCancel ? () => onCancel : null);
+    setAlertConfirmText(confirmText);
+    setAlertCancelText(cancelText);
+    setShowAlert(true);
+  };
+
   async function takePhoto(setter) {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert(
+      showAlertMessage(
         "Permissão necessária",
         "Autorize o uso da câmera para continuar."
       );
@@ -125,6 +144,15 @@ export default function DocumentCaptureScreen() {
           <Text style={styles.ctaText}>Continuar</Text>
         </TouchableOpacity>
       </View>
+      <Alert
+        isVisible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertOnConfirm}
+        onCancel={alertOnCancel}
+        confirmText={alertConfirmText}
+        cancelText={alertCancelText}
+      />
     </View>
   );
 }

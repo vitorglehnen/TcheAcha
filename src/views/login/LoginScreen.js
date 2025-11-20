@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  Alert,
   ActivityIndicator,
   Platform,
 } from "react-native";
@@ -16,6 +15,7 @@ import { makeRedirectUri } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import Constants from "expo-constants";
 import { supabase } from "../../lib/supabase";
+import Alert from '../../components/alert/Alert';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
@@ -23,9 +23,28 @@ export default function LoginScreen({ navigation }) {
   const [secure, setSecure] = useState(true);
   const [loading, setLoading] = useState(false);
 
+  // State for custom alert
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertOnConfirm, setAlertOnConfirm] = useState(() => () => {});
+  const [alertOnCancel, setAlertOnCancel] = useState(null);
+  const [alertConfirmText, setAlertConfirmText] = useState('OK');
+  const [alertCancelText, setAlertCancelText] = useState('Cancel');
+
+  const showAlertMessage = (title, message, onConfirm = () => setShowAlert(false), onCancel = null, confirmText = 'OK', cancelText = 'Cancel') => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertOnConfirm(() => onConfirm);
+    setAlertOnCancel(onCancel ? () => onCancel : null);
+    setAlertConfirmText(confirmText);
+    setAlertCancelText(cancelText);
+    setShowAlert(true);
+  };
+
   const handleLogin = async () => {
     if (!email || !senha) {
-      Alert.alert("Erro", "Por favor, preencha todos os campos.");
+      showAlertMessage("Erro", "Por favor, preencha todos os campos.");
       return;
     }
 
@@ -33,7 +52,7 @@ export default function LoginScreen({ navigation }) {
     try {
       await signIn(email, senha);
     } catch (error) {
-      Alert.alert("Erro no Login", error.message);
+      showAlertMessage("Erro no Login", error.message);
     } finally {
       setLoading(false);
     }
@@ -80,7 +99,7 @@ export default function LoginScreen({ navigation }) {
         }
       }
     } catch (err) {
-      Alert.alert("Erro inesperado", err.message ?? String(err));
+      showAlertMessage("Erro inesperado", err.message ?? String(err));
     } finally {
       setLoading(false);
     }
@@ -175,6 +194,15 @@ export default function LoginScreen({ navigation }) {
           <Text style={styles.registerLink}> Registre-se</Text>
         </TouchableOpacity>
       </View>
+      <Alert
+        isVisible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertOnConfirm}
+        onCancel={alertOnCancel}
+        confirmText={alertConfirmText}
+        cancelText={alertCancelText}
+      />
     </View>
   );
 }

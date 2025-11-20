@@ -303,36 +303,5 @@ export const styles = StyleSheet.create({
     top: 50,
     right: 20,
     padding: 10,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 10,
-    marginTop: 10,
-  },
-  modalButtonGeneric: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cancelButton: {
-    backgroundColor: "#f8f9fa",
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
-  },
-  cancelButtonText: {
-    color: "#6c757d",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  reportSubmitButton: { 
-    backgroundColor: "#e74c3c",
-  },
-  reportSubmitButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
-  },
+  }
 });

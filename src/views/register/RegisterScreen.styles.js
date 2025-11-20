@@ -110,9 +110,9 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: "#B5B5B5",
   },
-  loginLink: {
-    fontSize: 14,
-    color: "#000",
-    fontWeight: "500",
-  },
-});
+      loginLink: {
+          fontSize: 14,
+          color: "#000",
+          fontWeight: "500",
+      },
+  });

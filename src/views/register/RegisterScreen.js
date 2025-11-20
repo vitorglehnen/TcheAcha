@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  Alert,
   ActivityIndicator,
   ScrollView,
   KeyboardAvoidingView,
@@ -14,6 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { signUp } from "../../controllers/authController";
 import { styles } from "./RegisterScreen.styles";
+import Alert from '../../components/alert/Alert'; // Import custom Alert component
 
 export default function RegisterScreen({ navigation }) {
   const [nome, setNome] = useState("");
@@ -24,26 +24,54 @@ export default function RegisterScreen({ navigation }) {
   const [secureConfirmar, setSecureConfirmar] = useState(true);
   const [loading, setLoading] = useState(false);
 
+  const [nomeError, setNomeError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [senhaError, setSenhaError] = useState("");
+  const [confirmarSenhaError, setConfirmarSenhaError] = useState("");
+
+  // State for custom alert
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertOnConfirm, setAlertOnConfirm] = useState(() => () => {});
+  const [alertOnCancel, setAlertOnCancel] = useState(null);
+  const [alertConfirmText, setAlertConfirmText] = useState('OK');
+  const [alertCancelText, setAlertCancelText] = useState('Cancel');
+
+  const showAlertMessage = (title, message, onConfirm = () => setShowAlert(false), onCancel = null, confirmText = 'OK', cancelText = 'Cancel') => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertOnConfirm(() => onConfirm);
+    setAlertOnCancel(onCancel ? () => onCancel : null);
+    setAlertConfirmText(confirmText);
+    setAlertCancelText(cancelText);
+    setShowAlert(true);
+  };
+
   const handleRegister = async () => {
     if (!nome || !email || !senha || !confirmarSenha) {
-      Alert.alert("Erro", "Por favor, preencha todos os campos.");
+      showAlertMessage("Erro", "Por favor, preencha todos os campos.");
       return;
     }
     if (senha !== confirmarSenha) {
-      Alert.alert("Erro", "As senhas não coincidem.");
+      showAlertMessage("Erro", "As senhas não coincidem.");
+      return;
+    }
+    if (senha.length < 6) {
+      showAlertMessage("Erro", "A senha deve ter no mínimo 6 caracteres.");
       return;
     }
 
     setLoading(true);
     try {
       await signUp(nome, email, senha);
-      Alert.alert(
-        "Registro Concluído",
-        "Por favor, verifique seu e-mail para confirmar sua conta."
-      );
-      navigation.navigate("Login");
+      // showAlertMessage(
+      //   "Registro Concluído",
+      //   "Por favor, verifique seu e-mail para confirmar sua conta."
+      // );
+      navigation.navigate("Home");
     } catch (error) {
-      Alert.alert("Erro no Registro", error.message);
+      showAlertMessage("Erro no Registro", "Ocorreu um erro inesperado. Por favor, tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -172,6 +200,15 @@ export default function RegisterScreen({ navigation }) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      <Alert
+        isVisible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertOnConfirm}
+        onCancel={alertOnCancel}
+        confirmText={alertConfirmText}
+        cancelText={alertCancelText}
+      />
     </KeyboardAvoidingView>
   );
 }
