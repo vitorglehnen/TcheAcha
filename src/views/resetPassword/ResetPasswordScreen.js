@@ -4,6 +4,7 @@ import {
   Text, 
   TextInput, 
   TouchableOpacity, 
+  Alert, 
   ActivityIndicator, 
   Image,
   ScrollView,
@@ -13,7 +14,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { styles } from './ResetPassword.styles';
 import { supabase } from '../../lib/supabase';
 import { getCurrentUser, signIn } from '../../controllers/authController';
-import Alert from '../../components/alert/Alert';
 
 export default function ResetPasswordScreen({ navigation }) {
   const [password, setPassword] = useState('');
@@ -22,32 +22,13 @@ export default function ResetPasswordScreen({ navigation }) {
   const [secureConfirm, setSecureConfirm] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  // State for custom alert
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertTitle, setAlertTitle] = useState('');
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertOnConfirm, setAlertOnConfirm] = useState(() => () => {});
-  const [alertOnCancel, setAlertOnCancel] = useState(null);
-  const [alertConfirmText, setAlertConfirmText] = useState('OK');
-  const [alertCancelText, setAlertCancelText] = useState('Cancel');
-
-  const showAlertMessage = (title, message, onConfirm = () => setShowAlert(false), onCancel = null, confirmText = 'OK', cancelText = 'Cancel') => {
-    setAlertTitle(title);
-    setAlertMessage(message);
-    setAlertOnConfirm(() => onConfirm);
-    setAlertOnCancel(onCancel ? () => onCancel : null);
-    setAlertConfirmText(confirmText);
-    setAlertCancelText(cancelText);
-    setShowAlert(true);
-  };
-
   const handlePasswordReset = async () => {
     if (password !== confirmPassword) {
-      showAlertMessage('Erro', 'As senhas não coincidem.');
+      Alert.alert('Erro', 'As senhas não coincidem.');
       return;
     }
     if (password.length < 6) {
-      showAlertMessage('Erro', 'A senha deve ter no mínimo 6 caracteres.');
+      Alert.alert('Erro', 'A senha deve ter no mínimo 6 caracteres.');
       return;
     }
 
@@ -55,7 +36,7 @@ export default function ResetPasswordScreen({ navigation }) {
     try {
       const user = await getCurrentUser();
       if (!user) {
-        showAlertMessage('Erro', 'Não foi possível obter o usuário atual. Por favor, tente novamente.');
+        Alert.alert('Erro', 'Não foi possível obter o usuário atual. Por favor, tente novamente.');
         setLoading(false);
         return;
       }
@@ -64,19 +45,19 @@ export default function ResetPasswordScreen({ navigation }) {
 
       if (error) {
         setLoading(false);
-        showAlertMessage('Erro ao Redefinir Senha', error.message);
+        Alert.alert('Erro ao Redefinir Senha', error.message);
       } else {
         await signIn(user.email, password);
         setLoading(false);
-        showAlertMessage(
+        Alert.alert(
           'Sucesso',
-          'Sua senha foi redefinida com sucesso! Você será redirecionado para a tela inicial.',
-          () => navigation.navigate('Home')
+          'Sua senha foi redefinida com sucesso! Você será redirecionado para a tela inicial.'
         );
+        navigation.navigate('Home');
       }
     } catch (err) {
       setLoading(false);
-      showAlertMessage('Erro Inesperado', err.message);
+      Alert.alert('Erro Inesperado', err.message);
     }
   };
 
@@ -158,15 +139,6 @@ export default function ResetPasswordScreen({ navigation }) {
           )}
         </TouchableOpacity>
       </ScrollView>
-      <Alert
-        isVisible={showAlert}
-        title={alertTitle}
-        message={alertMessage}
-        onConfirm={alertOnConfirm}
-        onCancel={alertOnCancel}
-        confirmText={alertConfirmText}
-        cancelText={alertCancelText}
-      />
     </KeyboardAvoidingView>
   );
 }

@@ -5,13 +5,13 @@ import {
   TouchableOpacity,
   Pressable,
   ScrollView,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { styles } from "./VerifyIdentityScreen.styles";
 import { uploadVerificationDocuments } from "../../controllers/authController";
 import { getCurrentUserStatusAndProfileId } from "../../controllers/caseController";
-import Alert from "../../components/alert/Alert";
 
 // Importando sua instância do Supabase
 import { supabase } from "../../lib/supabase"; // Ajuste o caminho se for diferente
@@ -34,25 +34,6 @@ export default function VerifyIdentityScreen() {
 
   // Estado para controlar o feedback de carregamento no botão
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // State for custom alert
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertTitle, setAlertTitle] = useState('');
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertOnConfirm, setAlertOnConfirm] = useState(() => () => {});
-  const [alertOnCancel, setAlertOnCancel] = useState(null);
-  const [alertConfirmText, setAlertConfirmText] = useState('OK');
-  const [alertCancelText, setAlertCancelText] = useState('Cancel');
-
-  const showAlertMessage = (title, message, onConfirm = () => setShowAlert(false), onCancel = null, confirmText = 'OK', cancelText = 'Cancel') => {
-    setAlertTitle(title);
-    setAlertMessage(message);
-    setAlertOnConfirm(() => onConfirm);
-    setAlertOnCancel(onCancel ? () => onCancel : null);
-    setAlertConfirmText(confirmText);
-    setAlertCancelText(cancelText);
-    setShowAlert(true);
-  };
 
   // Efeito para atualizar o estado quando o usuário volta das telas de captura
   useEffect(() => {
@@ -83,7 +64,7 @@ export default function VerifyIdentityScreen() {
 
     // Verifica se temos os dados das imagens
     if (!docFrente || !docVerso || !selfie) {
-      showAlertMessage(
+      Alert.alert(
         "Erro",
         "Parece que faltam imagens. Por favor, capture o documento e a selfie novamente."
       );
@@ -110,7 +91,7 @@ export default function VerifyIdentityScreen() {
 
       if (updateError) throw updateError;
 
-      showAlertMessage(
+      Alert.alert(
         "Sucesso!",
         "Seus documentos foram enviados para análise. Você será redirecionado para a tela inicial."
       );
@@ -118,11 +99,18 @@ export default function VerifyIdentityScreen() {
       // Navega para a HomeScreen
       navigation.reset({
         index: 0,
-        routes: [{ name: "Home" }],
+        routes: [
+          {
+            name: "MainApp",
+            state: {
+              routes: [{ name: "Home" }],
+            },
+          },
+        ],
       });
     } catch (error) {
       console.error("Erro ao enviar para verificação:", error.message);
-      showAlertMessage(
+      Alert.alert(
         "Erro",
         `Não foi possível enviar seus documentos: ${error.message}`
       );
@@ -219,15 +207,6 @@ export default function VerifyIdentityScreen() {
           aprovação, você poderá cadastrar ou auxiliar em casos no TchêAcha.
         </Text>
       </ScrollView>
-      <Alert
-        isVisible={showAlert}
-        title={alertTitle}
-        message={alertMessage}
-        onConfirm={alertOnConfirm}
-        onCancel={alertOnCancel}
-        confirmText={alertConfirmText}
-        cancelText={alertCancelText}
-      />
     </View>
   );
 }

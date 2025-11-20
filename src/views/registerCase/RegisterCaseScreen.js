@@ -8,6 +8,7 @@ import {
   ScrollView,
   Platform,
   SafeAreaView,
+  Alert,
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,7 +22,6 @@ import {
 } from "../../controllers/caseController";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { COLORS } from "../../styles/globalStyles";
-import Alert from '../../components/alert/Alert';
 
 // Valores dos ENUMs do banco de dados
 const TIPO_CASO = { PESSOA: "PESSOA", ANIMAL: "ANIMAL" };
@@ -68,23 +68,14 @@ export default function RegisterCaseScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
 
-  // State for custom alert
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertTitle, setAlertTitle] = useState('');
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertOnConfirm, setAlertOnConfirm] = useState(() => () => {});
-  const [alertOnCancel, setAlertOnCancel] = useState(null);
-  const [alertConfirmText, setAlertConfirmText] = useState('OK');
-  const [alertCancelText, setAlertCancelText] = useState('Cancel');
+  const onChangeDate = (event, selectedDate) => {
+    // Esconde o seletor de data
+    setShowDatePicker(false);
 
-  const showAlertMessage = (title, message, onConfirm = () => setShowAlert(false), onCancel = null, confirmText = 'OK', cancelText = 'Cancel') => {
-    setAlertTitle(title);
-    setAlertMessage(message);
-    setAlertOnConfirm(() => onConfirm);
-    setAlertOnCancel(onCancel ? () => onCancel : null);
-    setAlertConfirmText(confirmText);
-    setAlertCancelText(cancelText);
-    setShowAlert(true);
+    // Se o usuário selecionou uma data (não clicou em "cancelar")
+    if (selectedDate) {
+      setDate(selectedDate);
+    }
   };
 
   // Efeito para carregar dados do usuário
@@ -102,29 +93,36 @@ export default function RegisterCaseScreen({ navigation }) {
 
         // 2. PENDENTE: Avisa que está em análise e volta para a tela anterior.
         if (profile.status === "PENDENTE") {
-          showAlertMessage(
+          Alert.alert(
             "Análise Pendente",
             "Seu perfil ainda está sendo analisado. Você não pode cadastrar casos no momento.",
-            () => navigation.goBack()
+            [{ text: "OK", onPress: () => navigation.goBack() }]
           );
           return; // Impede a execução do código abaixo
         }
 
         // 3. NAO_VERIFICADO ou REJEITADO: Dá a opção de ir para a verificação.
-        showAlertMessage(
+        Alert.alert(
           "Verificação Necessária",
           "Você precisa ser um usuário verificado para criar ou editar um caso.",
-          () => navigation.navigate("VerifyIdentity"),
-          () => navigation.goBack(),
-          "Verificar Agora",
-          "Cancelar"
+          [
+            {
+              text: "Cancelar",
+              onPress: () => navigation.goBack(),
+              style: "cancel",
+            },
+            {
+              text: "Verificar Agora",
+              onPress: () => navigation.navigate("VerifyIdentity"),
+            },
+          ]
         );
       } catch (error) {
-        showAlertMessage(
+        Alert.alert(
           "Erro",
-          "Não foi possível verificar seu status. Tente novamente.",
-          () => navigation.goBack()
+          "Não foi possível verificar seu status. Tente novamente."
         );
+        navigation.goBack();
       }
     };
     loadUserData();
@@ -143,7 +141,7 @@ export default function RegisterCaseScreen({ navigation }) {
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      showAlertMessage("Desculpe, precisamos de permissão para acessar suas fotos!");
+      alert("Desculpe, precisamos de permissão para acessar suas fotos!");
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -185,7 +183,7 @@ export default function RegisterCaseScreen({ navigation }) {
       !location ||
       !enderecoFormatado
     ) {
-      showAlertMessage("Erro", "Por favor, preencha todos os campos obrigatórios.");
+      Alert.alert("Erro", "Por favor, preencha todos os campos obrigatórios.");
       return;
     }
 
@@ -207,14 +205,14 @@ export default function RegisterCaseScreen({ navigation }) {
 
       const savedCase = await saveCase(formData, existingCase, userProfile);
 
-      showAlertMessage(
+      Alert.alert(
         "Sucesso!",
         `Caso ${isEditMode ? "atualizado" : "cadastrado"} com sucesso.`,
-        () => navigation.navigate("MyCases")
+        [{ text: "OK", onPress: () => navigation.navigate("MyCases") }]
       );
     } catch (error) {
       console.error("Erro ao salvar caso:", error);
-      showAlertMessage("Erro ao Salvar", error.message);
+      Alert.alert("Erro ao Salvar", error.message);
     } finally {
       setLoading(false);
     }
@@ -302,6 +300,7 @@ export default function RegisterCaseScreen({ navigation }) {
             is24Hour={true}
             display="default"
             onChange={onChangeDate}
+            maximumDate={new Date()}
           />
         )}
 
@@ -390,15 +389,6 @@ export default function RegisterCaseScreen({ navigation }) {
           <Ionicons name="save" size={32} color="#fff" />
         )}
       </TouchableOpacity>
-      <Alert
-        isVisible={showAlert}
-        title={alertTitle}
-        message={alertMessage}
-        onConfirm={alertOnConfirm}
-        onCancel={alertOnCancel}
-        confirmText={alertConfirmText}
-        cancelText={alertCancelText}
-      />
     </SafeAreaView>
   );
 }
