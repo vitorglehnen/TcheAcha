@@ -22,7 +22,6 @@ export default function ForgotPasswordScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
 
   // 1. A função foi renomeada e a lógica trocada
-  const handleRequestCode = async () => {
   // State for custom alert
   const [showAlert, setShowAlert] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
@@ -42,7 +41,7 @@ export default function ForgotPasswordScreen({ navigation }) {
     setShowAlert(true);
   };
 
-  const handlePasswordReset = async () => {
+  const handleRequestCode = async () => {
     if (!email) {
       showAlertMessage('Erro', 'Por favor, insira seu e-mail.');
       return;
@@ -55,7 +54,7 @@ export default function ForgotPasswordScreen({ navigation }) {
       options: {
         // Isso garante que o usuário não seja logado
         // e apenas receba o código.
-        shouldCreateUser: false, 
+        shouldCreateUser: false,
       }
     });
 

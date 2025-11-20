@@ -1,11 +1,23 @@
-import React from "react";
-import { View, Text, TouchableOpacity, ScrollView, Alert, SafeAreaView } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  SafeAreaView,
+  StatusBar,
+  ActivityIndicator,
+  TextInput,
+  Modal,
+  ScrollView,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./SettingsScreen.styles";
 import Header from "../../components/header/Header";
 import { supabase } from "../../lib/supabase";
 import { sendPasswordResetEmail, getCurrentUser } from "../../controllers/authController";
-import alert from "../../components/alert/Alert";
+import Alert from "../../components/alert/Alert";
 
 export default function SettingsScreen({ navigation }) {
 
