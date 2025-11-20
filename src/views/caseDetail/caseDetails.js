@@ -78,14 +78,17 @@ const TimelineItem = ({ item, type, currentProfileId, onDelete, onReport, onImag
         )}
       </TouchableOpacity>
       
+      {/* Botões de Ação (Denunciar/Excluir) */}
       {expanded && currentProfileId && (
         <View style={styles.timelineActions}>
           {isOwner ? (
+            // Se for dono, pode excluir
             <TouchableOpacity style={styles.actionButton} onPress={onDelete}>
               <Ionicons name="trash-outline" size={16} color="#e74c3c" />
               <Text style={styles.deleteButtonText}>Excluir</Text>
             </TouchableOpacity>
           ) : (
+            // Se não for dono, pode denunciar
             <TouchableOpacity style={styles.actionButton} onPress={onReport}>
               <Ionicons name="alert-circle-outline" size={16} color={COLORS.textSecondary} />
               <Text style={styles.reportButtonText}>Denunciar</Text>
@@ -165,8 +168,11 @@ const CaseDetailScreen = ({ navigation }) => {
         const { isVerified, profileId } = await getCurrentUserStatusAndProfileId();
         setIsUserVerified(isVerified);
         setCurrentProfileId(profileId);
+
         const { caseDetails: fetchedDetails, sightings: fetchedSightings, comments: fetchedComments } = await getCaseDetails(caseId, profileId);
+
         if (!fetchedDetails) throw new Error("Detalhes do caso não encontrados.");
+        
         setCaseDetails(fetchedDetails);
         setSightings(fetchedSightings);
         setComments(fetchedComments);
@@ -179,6 +185,7 @@ const CaseDetailScreen = ({ navigation }) => {
     loadData();
   }, [casoFromParams?.id]);
 
+  // Efeito para montar a timeline
   useEffect(() => {
     const combinedItems = [
       ...sightings.map(s => ({ ...s, type: 'sighting', date: new Date(s.data_avistamento) })),
@@ -225,8 +232,6 @@ const CaseDetailScreen = ({ navigation }) => {
   };
 
   // --- Funções de Denúncia / Exclusão ---
-  
-  /** Abre o modal de denúncia */
   const handleReport = (item, type) => {
     if (!isUserVerified) {
       showAlertMessage("Verificação Necessária", "Você precisa estar verificado para denunciar um conteúdo.");
@@ -254,6 +259,7 @@ const CaseDetailScreen = ({ navigation }) => {
     );
   };
 
+  /** Exclui um comentário */
   const handleDeleteComment = (commentId) => {
     showAlertMessage(
       "Excluir Comentário",
@@ -272,6 +278,7 @@ const CaseDetailScreen = ({ navigation }) => {
     );
   };
 
+  /** Exclui um avistamento */
   const handleDeleteSighting = (sightingId) => {
     showAlertMessage(
       "Excluir Avistamento",
@@ -290,13 +297,15 @@ const CaseDetailScreen = ({ navigation }) => {
     );
   };
 
-  // --- Funções do Modal de Avistamento (sem alterações) ---
+  // --- Funções do Modal de Avistamento ---
+
   /** Seleciona a data do avistamento */
   const onChangeDate = (event, selectedDate) => {
     const currentDate = selectedDate || sightingDate;
     setShowDatePicker(Platform.OS === 'ios');
     setSightingDate(currentDate);
   };
+
   /** Pede permissão e pega a localização atual */
   const handlePickLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -311,6 +320,7 @@ const CaseDetailScreen = ({ navigation }) => {
       showAlertMessage('Erro ao pegar localização', 'Não foi possível obter a localização atual.');
     }
   };
+
   /** Pede permissão e abre a galeria */
   const handlePickImage = async () => {
     let { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -320,12 +330,16 @@ const CaseDetailScreen = ({ navigation }) => {
     }
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true, aspect: [4, 3], quality: 0.5, base64: true,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.5,
+      base64: true,
     });
     if (!result.canceled) {
       setSightingImage(result.assets[0]);
     }
   };
+
   /** Envia o avistamento para o Controller */
   const handleSubmitSighting = async () => {
     if (!sightingDesc.trim() || !sightingLocation || !sightingDate) {
@@ -351,6 +365,7 @@ const CaseDetailScreen = ({ navigation }) => {
     }
   };
 
+
   // --- RENDERIZAÇÃO ---
   return (
     <View style={styles.container}>
@@ -359,6 +374,7 @@ const CaseDetailScreen = ({ navigation }) => {
         onLeftPress={() => navigation.goBack()}
         showLogo={false}
       />
+
       <KeyboardAvoidingView 
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
@@ -460,14 +476,17 @@ const CaseDetailScreen = ({ navigation }) => {
                   <Ionicons name="close" size={28} color={COLORS.textSecondary} />
                 </TouchableOpacity>
               </View>
+
               <Text style={styles.detailLabel}>Descrição do avistamento*</Text>
               <TextInput style={styles.modalInput} placeholder="Descreva o que viu..." value={sightingDesc} onChangeText={setSightingDesc} multiline />
+
               <Text style={styles.detailLabel}>Data e Hora do Avistamento*</Text>
               <TouchableOpacity style={styles.modalButton} onPress={() => setShowDatePicker(true)}>
                 <Ionicons name="calendar-outline" size={20} color={COLORS.textPrimary} />
                 <Text style={styles.modalButtonText}>{sightingDate.toLocaleString('pt-BR')}</Text>
               </TouchableOpacity>
               {showDatePicker && ( <DateTimePicker value={sightingDate} mode="datetime" is24Hour={true} display="default" onChange={onChangeDate} /> )}
+
               <Text style={styles.detailLabel}>Localização*</Text>
               <TouchableOpacity style={styles.modalButton} onPress={handlePickLocation}>
                 <Ionicons name="location-outline" size={20} color={COLORS.textPrimary} />
@@ -475,6 +494,7 @@ const CaseDetailScreen = ({ navigation }) => {
                 {sightingLocation && <Ionicons name="checkmark-circle" size={20} color="green" style={{ marginLeft: 10 }} />}
               </TouchableOpacity>
               {sightingLocation && (<Text style={styles.modalLocationText}>Lat: {sightingLocation.latitude.toFixed(4)}, Lon: {sightingLocation.longitude.toFixed(4)}</Text>)}
+
               <Text style={styles.detailLabel}>Foto (Opcional)</Text>
               {sightingImage ? (
                 <View style={styles.imagePreviewContainer}>
@@ -489,57 +509,12 @@ const CaseDetailScreen = ({ navigation }) => {
                   <Text style={styles.modalButtonText}>Adicionar foto</Text>
                 </TouchableOpacity>
               )}
+
               <TouchableOpacity style={styles.submitButton} onPress={handleSubmitSighting} disabled={isSubmittingSighting}>
                 {isSubmittingSighting ? (<ActivityIndicator color={COLORS.white} />) : (<Text style={styles.submitButtonText}>ENVIAR AVISTAMENTO</Text>)}
               </TouchableOpacity>
             </View>
           </ScrollView>
-        </KeyboardAvoidingView>
-      </Modal>
-
-      {/* --- MODAL DE DENÚNCIA --- */}
-      <Modal
-        visible={reportModalVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setReportModalVisible(false)}
-      >
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.modalBackdrop}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Denunciar Conteúdo</Text>
-              <TouchableOpacity onPress={() => setReportModalVisible(false)}>
-                <Ionicons name="close" size={28} color={COLORS.textSecondary} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.detailLabel}>Motivo da denúncia*</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Descreva por que este conteúdo é inadequado..."
-              value={reportReason}
-              onChangeText={setReportReason}
-              multiline
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButtonGeneric, styles.cancelButton]}
-                onPress={() => setReportModalVisible(false)}
-              >
-                <Text style={styles.cancelButtonText}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalButtonGeneric, styles.reportSubmitButton]}
-                onPress={handleSubmitReport}
-                disabled={isSubmittingReport}
-              >
-                {isSubmittingReport ? (
-                  <ActivityIndicator color={COLORS.white} />
-                ) : (
-                  <Text style={styles.reportSubmitButtonText}>Enviar Denúncia</Text>
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
         </KeyboardAvoidingView>
       </Modal>
 

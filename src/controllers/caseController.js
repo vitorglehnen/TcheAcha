@@ -45,15 +45,13 @@ const formatCasesData = (cases) => {
 /** Obtém a lista de casos ativos processados para a HomeScreen. */
 export const getActiveCasesForHome = async (
   userLatitude = null,
-  userLongitude = null,
-  limit = 3
+  userLongitude = null
 ) => {
   try {
     console.log("Controller: Buscando casos ativos para a tela inicial...");
     console.log("Controller: Parâmetros recebidos:", {
       userLatitude,
       userLongitude,
-      limit,
     });
 
     // Se tiver localização do usuário, busca os mais próximos
@@ -66,7 +64,6 @@ export const getActiveCasesForHome = async (
         const { data, error } = await supabase.rpc("get_nearby_cases", {
           lat: userLatitude,
           long: userLongitude,
-          limit_count: limit,
         });
 
         if (error) {
@@ -77,7 +74,7 @@ export const getActiveCasesForHome = async (
           );
           // Fallback: buscar casos sem filtro de distância
           const cases = await fetchActiveCases();
-          return formatCasesData(cases?.slice(0, limit));
+          return formatCasesData(cases?.slice(0, 3));
         }
 
         console.log(
@@ -98,14 +95,14 @@ export const getActiveCasesForHome = async (
         console.error("Controller: Stack trace:", rpcError.stack);
         // Fallback para casos recentes
         const cases = await fetchActiveCases();
-        return formatCasesData(cases?.slice(0, limit));
+        return formatCasesData(cases?.slice(0, 3));
       }
     }
 
     // Se não tiver localização, retorna os mais recentes
     console.log("Controller: Sem localização, buscando casos mais recentes");
     const cases = await fetchActiveCases();
-    return formatCasesData(cases?.slice(0, limit));
+    return formatCasesData(cases?.slice(0, 3));
   } catch (error) {
     console.error("Controller: Erro ao obter casos para Home:", error.message);
     throw error;
