@@ -4,13 +4,13 @@ import {
   Text,
   TouchableOpacity,
   Platform,
-  Alert,
   SafeAreaView,
 } from 'react-native';
 import { styles } from './MapPickerScreen.styles';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { COLORS } from '../../styles/globalStyles';
+import Alert from '../../components/alert/Alert';
 
 // Importa o MapView condicionalmente
 let MapView, PROVIDER_GOOGLE;
@@ -35,6 +35,25 @@ export default function MapPickerScreen({ navigation, route }) {
   const mapRef = useRef(null);
   const [pickedLocation, setPickedLocation] = useState(initialRegion);
 
+  // State for custom alert
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertOnConfirm, setAlertOnConfirm] = useState(() => () => {});
+  const [alertOnCancel, setAlertOnCancel] = useState(null);
+  const [alertConfirmText, setAlertConfirmText] = useState('OK');
+  const [alertCancelText, setAlertCancelText] = useState('Cancel');
+
+  const showAlertMessage = (title, message, onConfirm = () => setShowAlert(false), onCancel = null, confirmText = 'OK', cancelText = 'Cancel') => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertOnConfirm(() => onConfirm);
+    setAlertOnCancel(onCancel ? () => onCancel : null);
+    setAlertConfirmText(confirmText);
+    setAlertCancelText(cancelText);
+    setShowAlert(true);
+  };
+
   // Atualiza o estado com a localização do centro do mapa
   const handleRegionChange = (region) => {
     setPickedLocation({
@@ -47,7 +66,7 @@ export default function MapPickerScreen({ navigation, route }) {
   const goToMyLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permissão negada', 'Não é possível buscar sua localização. Ative nas configurações.');
+      showAlertMessage('Permissão negada', 'Não é possível buscar sua localização. Ative nas configurações.');
       return;
     }
     try {
@@ -60,7 +79,7 @@ export default function MapPickerScreen({ navigation, route }) {
       };
       mapRef.current?.animateToRegion(region, 1000); // Anima o mapa
     } catch (error) {
-      Alert.alert('Erro', 'Não foi possível obter la localização atual.');
+      showAlertMessage('Erro', 'Não foi possível obter la localização atual.');
     }
   };
 
@@ -70,7 +89,7 @@ export default function MapPickerScreen({ navigation, route }) {
       // Retorna para a tela que chamou, passando 'pickedLocation' como parâmetro
       navigation.navigate(returnScreen, { pickedLocation: pickedLocation });
     } else {
-      Alert.alert("Erro", "Não foi possível selecionar a localização.");
+      showAlertMessage("Erro", "Não foi possível selecionar a localização.");
     }
   };
 
@@ -112,6 +131,16 @@ export default function MapPickerScreen({ navigation, route }) {
       <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmLocation}>
         <Text style={styles.confirmButtonText}>Confirmar Localização</Text>
       </TouchableOpacity>
-    </SafeAreaView>
+      
+      <Alert
+        isVisible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertOnConfirm}
+        onCancel={alertOnCancel}
+        confirmText={alertConfirmText}
+        cancelText={alertCancelText}
+      />
+    </SafeAreaView>    
   );
 }

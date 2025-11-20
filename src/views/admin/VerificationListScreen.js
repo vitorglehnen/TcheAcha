@@ -5,19 +5,38 @@ import {
   FlatList,
   TouchableOpacity,
   SafeAreaView,
-  ActivityIndicator,
-  Alert,
+  ActivityIndicator
 } from "react-native";
 import Header from "../../components/header/Header";
 import { supabase } from "../../lib/supabase";
 import styles from "./Admin.styles";
 import { useIsFocused } from "@react-navigation/native";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import Alert from '../../components/alert/Alert';
 
 const VerificationListScreen = ({ navigation }) => {
   const [pendingUsers, setPendingUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const isFocused = useIsFocused();
+
+  // State for custom alert
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertOnConfirm, setAlertOnConfirm] = useState(() => () => {});
+  const [alertOnCancel, setAlertOnCancel] = useState(null);
+  const [alertConfirmText, setAlertConfirmText] = useState('OK');
+  const [alertCancelText, setAlertCancelText] = useState('Cancel');
+
+  const showAlertMessage = (title, message, onConfirm = () => setShowAlert(false), onCancel = null, confirmText = 'OK', cancelText = 'Cancel') => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertOnConfirm(() => onConfirm);
+    setAlertOnCancel(onCancel ? () => onCancel : null);
+    setAlertConfirmText(confirmText);
+    setAlertCancelText(cancelText);
+    setShowAlert(true);
+  };
 
   useEffect(() => {
     // Recarrega a lista quando o admin volta da tela de detalhes
@@ -35,7 +54,7 @@ const VerificationListScreen = ({ navigation }) => {
       .order("created_at", { ascending: true });
 
     if (error) {
-      Alert.alert(
+      showAlertMessage(
         "Erro",
         "Não foi possível buscar as verificações: " + error.message
       );
@@ -83,6 +102,16 @@ const VerificationListScreen = ({ navigation }) => {
           }
         />
       )}
+
+      <Alert
+        isVisible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertOnConfirm}
+        onCancel={alertOnCancel}
+        confirmText={alertConfirmText}
+        cancelText={alertCancelText}
+      />
     </SafeAreaView>
   );
 };

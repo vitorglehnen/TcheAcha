@@ -6,9 +6,7 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  Platform,
   SafeAreaView,
-  Alert,
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -22,6 +20,7 @@ import {
 } from "../../controllers/caseController";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { COLORS } from "../../styles/globalStyles";
+import Alert from '../../components/alert/Alert';
 
 // Valores dos ENUMs do banco de dados
 const TIPO_CASO = { PESSOA: "PESSOA", ANIMAL: "ANIMAL" };
@@ -68,6 +67,25 @@ export default function RegisterCaseScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
 
+  // State for custom alert
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertOnConfirm, setAlertOnConfirm] = useState(() => () => {});
+  const [alertOnCancel, setAlertOnCancel] = useState(null);
+  const [alertConfirmText, setAlertConfirmText] = useState('OK');
+  const [alertCancelText, setAlertCancelText] = useState('Cancel');
+
+  const showAlertMessage = (title, message, onConfirm = () => setShowAlert(false), onCancel = null, confirmText = 'OK', cancelText = 'Cancel') => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertOnConfirm(() => onConfirm);
+    setAlertOnCancel(onCancel ? () => onCancel : null);
+    setAlertConfirmText(confirmText);
+    setAlertCancelText(cancelText);
+    setShowAlert(true);
+  };
+
   const onChangeDate = (event, selectedDate) => {
     // Esconde o seletor de data
     setShowDatePicker(false);
@@ -93,7 +111,7 @@ export default function RegisterCaseScreen({ navigation }) {
 
         // 2. PENDENTE: Avisa que está em análise e volta para a tela anterior.
         if (profile.status === "PENDENTE") {
-          Alert.alert(
+          showAlertMessage(
             "Análise Pendente",
             "Seu perfil ainda está sendo analisado. Você não pode cadastrar casos no momento.",
             [{ text: "OK", onPress: () => navigation.goBack() }]
@@ -102,7 +120,7 @@ export default function RegisterCaseScreen({ navigation }) {
         }
 
         // 3. NAO_VERIFICADO ou REJEITADO: Dá a opção de ir para a verificação.
-        Alert.alert(
+        showAlertMessage(
           "Verificação Necessária",
           "Você precisa ser um usuário verificado para criar ou editar um caso.",
           [
@@ -118,7 +136,7 @@ export default function RegisterCaseScreen({ navigation }) {
           ]
         );
       } catch (error) {
-        Alert.alert(
+        showAlertMessage(
           "Erro",
           "Não foi possível verificar seu status. Tente novamente."
         );
@@ -183,7 +201,7 @@ export default function RegisterCaseScreen({ navigation }) {
       !location ||
       !enderecoFormatado
     ) {
-      Alert.alert("Erro", "Por favor, preencha todos os campos obrigatórios.");
+      showAlertMessage("Erro", "Por favor, preencha todos os campos obrigatórios.");
       return;
     }
 
@@ -205,14 +223,14 @@ export default function RegisterCaseScreen({ navigation }) {
 
       const savedCase = await saveCase(formData, existingCase, userProfile);
 
-      Alert.alert(
+      showAlertMessage(
         "Sucesso!",
         `Caso ${isEditMode ? "atualizado" : "cadastrado"} com sucesso.`,
         [{ text: "OK", onPress: () => navigation.navigate("MyCases") }]
       );
     } catch (error) {
       console.error("Erro ao salvar caso:", error);
-      Alert.alert("Erro ao Salvar", error.message);
+      showAlertMessage("Erro ao Salvar", error.message);
     } finally {
       setLoading(false);
     }
@@ -377,6 +395,15 @@ export default function RegisterCaseScreen({ navigation }) {
           </View>
         )}
       </ScrollView>
+      <Alert
+        isVisible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertOnConfirm}
+        onCancel={alertOnCancel}
+        confirmText={alertConfirmText}
+        cancelText={alertCancelText}
+      />
 
       <TouchableOpacity
         style={[styles.fab, loading && styles.fabDisabled]}

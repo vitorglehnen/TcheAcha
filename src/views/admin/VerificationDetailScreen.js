@@ -7,7 +7,6 @@ import {
   Image,
   SafeAreaView,
   ActivityIndicator,
-  Alert,
   Modal,
 } from "react-native";
 import Header from "../../components/header/Header";
@@ -15,6 +14,7 @@ import { supabase } from "../../lib/supabase";
 import { styles } from "./Admin.styles";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../../styles/globalStyles";
+import Alert from '../../components/alert/Alert';
 
 const VerificationDetailScreen = ({ route, navigation }) => {
   const { userId } = route.params;
@@ -32,6 +32,25 @@ const VerificationDetailScreen = ({ route, navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
 
+  // State for custom alert
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertOnConfirm, setAlertOnConfirm] = useState(() => () => {});
+  const [alertOnCancel, setAlertOnCancel] = useState(null);
+  const [alertConfirmText, setAlertConfirmText] = useState('OK');
+  const [alertCancelText, setAlertCancelText] = useState('Cancel');
+
+  const showAlertMessage = (title, message, onConfirm = () => setShowAlert(false), onCancel = null, confirmText = 'OK', cancelText = 'Cancel') => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertOnConfirm(() => onConfirm);
+    setAlertOnCancel(onCancel ? () => onCancel : null);
+    setAlertConfirmText(confirmText);
+    setAlertCancelText(cancelText);
+    setShowAlert(true);
+  };
+
   useEffect(() => {
     fetchUserDetails();
   }, [userId]);
@@ -47,7 +66,7 @@ const VerificationDetailScreen = ({ route, navigation }) => {
       .single();
 
     if (error) {
-      Alert.alert("Erro", "Não foi possível buscar usuário: " + error.message);
+      showAlertMessage("Erro", "Não foi possível buscar usuário: " + error.message);
       navigation.goBack();
     } else {
       setUser(data);
@@ -104,9 +123,9 @@ const VerificationDetailScreen = ({ route, navigation }) => {
       .eq("id", userId);
 
     if (error) {
-      Alert.alert("Erro", error.message);
+      showAlertMessage("Erro", error.message);
     } else {
-      Alert.alert(
+      showAlertMessage(
         "Sucesso",
         `Usuário ${newStatus === "APROVADO" ? "aprovado" : "rejeitado"}.`
       );
@@ -270,6 +289,16 @@ const VerificationDetailScreen = ({ route, navigation }) => {
           )}
         </View>
       </Modal>
+      
+      <Alert
+        isVisible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertOnConfirm}
+        onCancel={alertOnCancel}
+        confirmText={alertConfirmText}
+        cancelText={alertCancelText}
+      />
     </SafeAreaView>
   );
 };

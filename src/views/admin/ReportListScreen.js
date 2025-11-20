@@ -5,19 +5,38 @@ import {
   FlatList,
   TouchableOpacity,
   SafeAreaView,
-  ActivityIndicator,
-  Alert,
+  ActivityIndicator
 } from "react-native";
 import Header from "../../components/header/Header";
 import { supabase } from "../../lib/supabase";
 import styles from "./Admin.styles";
 import { useIsFocused } from "@react-navigation/native";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import Alert from '../../components/alert/Alert';
 
 const ReportListScreen = ({ navigation }) => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const isFocused = useIsFocused();
+
+  // State for custom alert
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertOnConfirm, setAlertOnConfirm] = useState(() => () => {});
+  const [alertOnCancel, setAlertOnCancel] = useState(null);
+  const [alertConfirmText, setAlertConfirmText] = useState('OK');
+  const [alertCancelText, setAlertCancelText] = useState('Cancel');
+
+  const showAlertMessage = (title, message, onConfirm = () => setShowAlert(false), onCancel = null, confirmText = 'OK', cancelText = 'Cancel') => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertOnConfirm(() => onConfirm);
+    setAlertOnCancel(onCancel ? () => onCancel : null);
+    setAlertConfirmText(confirmText);
+    setAlertCancelText(cancelText);
+    setShowAlert(true);
+  };
 
   useEffect(() => {
     if (isFocused) {
@@ -45,7 +64,7 @@ const ReportListScreen = ({ navigation }) => {
       .order("created_at", { ascending: false });
 
     if (error) {
-      Alert.alert(
+      showAlertMessage(
         "Erro",
         "Não foi possível buscar as denúncias: " + error.message
       );
@@ -57,7 +76,7 @@ const ReportListScreen = ({ navigation }) => {
 
   // Função para lidar com clique (você pode expandir isso)
   const handleReportPress = (report) => {
-    Alert.alert(
+    showAlertMessage(
       "Revisar Denúncia",
       `ID Conteúdo: ${report.id_conteudo}\nTipo: ${report.tipo_conteudo}\n\nMotivo: ${report.motivo}\n\n(Ação de moderar ainda não implementada)`
     );
@@ -109,6 +128,16 @@ const ReportListScreen = ({ navigation }) => {
           }
         />
       )}
+      
+      <Alert
+        isVisible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertOnConfirm}
+        onCancel={alertOnCancel}
+        confirmText={alertConfirmText}
+        cancelText={alertCancelText}
+      />
     </SafeAreaView>
   );
 };

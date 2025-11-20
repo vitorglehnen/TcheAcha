@@ -5,12 +5,32 @@ import styles from "./SettingsScreen.styles";
 import Header from "../../components/header/Header";
 import { supabase } from "../../lib/supabase";
 import { sendPasswordResetEmail, getCurrentUser } from "../../controllers/authController";
+import alert from "../../components/alert/Alert";
 
 export default function SettingsScreen({ navigation }) {
 
+  // State for custom alert
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertOnConfirm, setAlertOnConfirm] = useState(() => () => {});
+  const [alertOnCancel, setAlertOnCancel] = useState(null);
+  const [alertConfirmText, setAlertConfirmText] = useState('OK');
+  const [alertCancelText, setAlertCancelText] = useState('Cancel');
+
+  const showAlertMessage = (title, message, onConfirm = () => setShowAlert(false), onCancel = null, confirmText = 'OK', cancelText = 'Cancel') => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertOnConfirm(() => onConfirm);
+    setAlertOnCancel(onCancel ? () => onCancel : null);
+    setAlertConfirmText(confirmText);
+    setAlertCancelText(cancelText);
+    setShowAlert(true);
+  };
+
   // Função para fazer logout
   const handleLogout = () => {
-    Alert.alert(
+    showAlertMessage(
       "Sair do aplicativo",
       "Tem certeza que deseja sair?",
       [
@@ -35,7 +55,7 @@ export default function SettingsScreen({ navigation }) {
 
   // Função para alterar senha
   const handleChangePassword = async () => {
-    Alert.alert(
+    showAlertMessage(
       "Alterar Senha",
       "Você receberá um e-mail com instruções para redefinir sua senha. Deseja continuar?",
       [
@@ -49,12 +69,12 @@ export default function SettingsScreen({ navigation }) {
                 throw new Error("Não foi possível encontrar seu e-mail.");
               }
               await sendPasswordResetEmail(user.email);
-              Alert.alert(
+              showAlertMessage(
                 "Verifique seu E-mail",
                 `Enviamos um link de redefinição de senha para ${user.email}.`
               );
             } catch (error) {
-              Alert.alert("Erro", error.message);
+              showAlertMessage("Erro", error.message);
             }
           }
         }
@@ -87,6 +107,15 @@ export default function SettingsScreen({ navigation }) {
 
         <View style={{ height: 40 }} />
       </ScrollView>
+      <Alert
+        isVisible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertOnConfirm}
+        onCancel={alertOnCancel}
+        confirmText={alertConfirmText}
+        cancelText={alertCancelText}
+      />
       
     </SafeAreaView>
   );

@@ -7,7 +7,6 @@ import {
   Modal,
   Pressable,
   ActivityIndicator,
-  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { styles, modalStyles } from "./HomeScreen.styles";
@@ -17,6 +16,7 @@ import Header from "../../components/header/Header";
 import { getActiveCasesForHome } from "../../controllers/caseController";
 import { useLocation } from "../../utils/locationHook";
 import { useIsFocused } from "@react-navigation/native";
+import Alert from '../../components/alert/Alert';
 
 const HomeScreen = ({ navigation }) => {
   const [cases, setCases] = useState([]);
@@ -26,6 +26,25 @@ const HomeScreen = ({ navigation }) => {
   
   const { getLocation } = useLocation();
   const isFocused = useIsFocused();
+
+  // State for custom alert
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertOnConfirm, setAlertOnConfirm] = useState(() => () => {});
+  const [alertOnCancel, setAlertOnCancel] = useState(null);
+  const [alertConfirmText, setAlertConfirmText] = useState('OK');
+  const [alertCancelText, setAlertCancelText] = useState('Cancel');
+
+  const showAlertMessage = (title, message, onConfirm = () => setShowAlert(false), onCancel = null, confirmText = 'OK', cancelText = 'Cancel') => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertOnConfirm(() => onConfirm);
+    setAlertOnCancel(onCancel ? () => onCancel : null);
+    setAlertConfirmText(confirmText);
+    setAlertCancelText(cancelText);
+    setShowAlert(true);
+  };
 
   // useEffect agora busca os dados reais com localização
   useEffect(() => {
@@ -55,7 +74,7 @@ const HomeScreen = ({ navigation }) => {
         console.log("HomeScreen: Casos carregados:", fetchedCases?.length || 0);
       } catch (error) {
         console.error("HomeScreen: Erro ao carregar casos:", error.message);
-        Alert.alert(
+        showAlertMessage(
           "Erro",
           "Não foi possível carregar os casos. Tente novamente mais tarde."
         );
@@ -104,7 +123,7 @@ const HomeScreen = ({ navigation }) => {
       navigation?.navigate("CaseDetail", { caso });
     } else if (status === "PENDENTE") {
       // 2. PENDENTE: Mostra alerta informativo
-      Alert.alert(
+      showAlertMessage(
         "Análise Pendente",
         "Seu perfil ainda está sendo analisado. Você será notificado quando for aprovado."
       );
@@ -255,6 +274,15 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </View>
       </Modal>
+      <Alert
+        isVisible={showAlert}
+        title={alertTitle}
+        message={alertMessage}
+        onConfirm={alertOnConfirm}
+        onCancel={alertOnCancel}
+        confirmText={alertConfirmText}
+        cancelText={alertCancelText}
+      />
     </View>
   );
 };
