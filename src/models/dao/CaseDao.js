@@ -128,10 +128,22 @@ export const fetchPendingSightingsForAutor = async (autorId) => {
   
   const { data, error } = await supabase
     .from('avistamentos')
-    .select(`id, descricao, foto_url, data_avistamento, status, casos ( id, nome_desaparecido, autor_id ) `)
-    .eq('status', 'PENDENTE')   
-    .eq('casos.autor_id', autorId) 
-    .neq('usuario_id', autorId);
+    .select(`
+      id,
+      descricao,
+      foto_url,
+      data_avistamento,
+      status,
+      usuario_id,
+      casos!inner (
+        id,
+        nome_desaparecido,
+        autor_id
+      )
+    `)
+    .eq('status', 'PENDENTE')
+    .eq('casos.autor_id', autorId)
+    .neq('usuario_id', autorId)
   
   if (error) { 
     console.error("DAO: Erro ao buscar avistamentos pendentes:", error.message);

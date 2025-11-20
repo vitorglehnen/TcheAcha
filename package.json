@@ -18,7 +18,7 @@
     "@react-navigation/native-stack": "^7.3.26",
     "@supabase/supabase-js": "^2.57.4",
     "base64-arraybuffer": "^1.0.2",
-    "expo": "^54.0.10",
+    "expo": "^54.0.23",
     "expo-auth-session": "~6.2.1",
     "expo-image-picker": "~17.0.8",
     "expo-location": "~19.0.7",

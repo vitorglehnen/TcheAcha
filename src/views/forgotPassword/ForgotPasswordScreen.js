@@ -1,3 +1,5 @@
+// src/views/forgotPassword/ForgotPasswordScreen.js
+
 import React, { useState } from 'react';
 import { 
   View, 
@@ -19,6 +21,8 @@ export default function ForgotPasswordScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // 1. A função foi renomeada e a lógica trocada
+  const handleRequestCode = async () => {
   // State for custom alert
   const [showAlert, setShowAlert] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
@@ -45,8 +49,14 @@ export default function ForgotPasswordScreen({ navigation }) {
     }
     setLoading(true);
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'http://localhost:8081/reset-password',
+    // 2. Trocamos resetPasswordForEmail por signInWithOtp
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email,
+      options: {
+        // Isso garante que o usuário não seja logado
+        // e apenas receba o código.
+        shouldCreateUser: false, 
+      }
     });
 
     setLoading(false);
@@ -56,9 +66,10 @@ export default function ForgotPasswordScreen({ navigation }) {
     } else {
       showAlertMessage(
         'Verifique seu E-mail',
-        'Se uma conta com este e-mail existir, um link para redefinir sua senha foi enviado.'
+        'Um código de 6 dígitos foi enviado para o seu e-mail.'
       );
-      navigation.goBack();
+      // 4. Navega para a NOVA tela (passando o e-mail)
+      navigation.navigate('VerifyCodeScreen', { email: email });
     }
   };
 
@@ -80,7 +91,7 @@ export default function ForgotPasswordScreen({ navigation }) {
             <View>
               <Text style={styles.title}>Recuperar Senha</Text>
               <Text style={styles.subtitle}>
-                Insira seu e-mail para enviarmos um link de recuperação
+                Insira seu e-mail para enviarmos um código de 6 dígitos
               </Text>
             </View>
           </View>
@@ -106,8 +117,9 @@ export default function ForgotPasswordScreen({ navigation }) {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={handlePasswordReset} disabled={loading}>
-          {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.buttonText}>Enviar email de recuperação</Text>}
+        {/* 5. Botão agora chama 'handleRequestCode' e tem texto novo */}
+        <TouchableOpacity style={styles.button} onPress={handleRequestCode} disabled={loading}>
+          {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.buttonText}>Enviar código</Text>}
         </TouchableOpacity>
       </ScrollView>
       <Alert
